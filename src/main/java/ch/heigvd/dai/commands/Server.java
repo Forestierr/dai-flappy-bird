@@ -20,36 +20,21 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-package ch.heigvd.dai;
+package ch.heigvd.dai.commands;
 
-import ch.heigvd.dai.commands.Root;
 import picocli.CommandLine;
 
-import java.io.File;
+import java.util.concurrent.Callable;
 
-public class Main {
+@CommandLine.Command(
+    description = "Launch the server.",
+    version = "1.0.0",
+    scope = CommandLine.ScopeType.INHERIT,
+    mixinStandardHelpOptions = true)
+public class Server implements Callable<Integer> {
 
-  public static void main(String[] args) {
-    // Define command name - source: https://stackoverflow.com/a/11159435
-    String jarFilename =
-        new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath())
-            .getName();
-
-    // Create Root command
-    Root root = new Root();
-
-    // Calculate execution time for root command
-    Long start = System.nanoTime();
-    int exitCode =
-        new CommandLine(root)
-            .setCommandName(jarFilename)
-            .setCaseInsensitiveEnumValuesAllowed(true)
-            .execute(args);
-    Long end = System.nanoTime();
-
-    if (exitCode == 0) {
-      System.out.println("Execution time in ms: " + (end - start) / (1000 * 1000));
-    }
-    System.exit(exitCode);
+  @Override
+  public Integer call() {
+    return 0;
   }
 }
