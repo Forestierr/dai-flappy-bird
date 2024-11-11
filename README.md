@@ -80,12 +80,12 @@ validate the change.
 
 ### One player
 
-![OnePlayer.png](https://github.com/forestierr/dai-flappy-bird/docs/OnePlayer.png)
+![OnePlayer.png](docs/OnePlayer.png)
 
 ### Two players
 
-![TwoPlayers.png](https://github.com/forestierr/dai-flappy-bird/docs/TwoPlayers.png)
+![TwoPlayers.png](docs/TwoPlayers.png)
 
 ### Full lobby scenario
 
-![LobbyFull.png](https://github.com/forestierr/dai-flappy-bird/docs/FLobbyFull.png)
+![LobbyFull.png](docs/LobbyFull.png)
