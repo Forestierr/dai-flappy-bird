@@ -22,19 +22,47 @@
 // SOFTWARE.
 package ch.heigvd.dai.commands;
 
+import ch.heigvd.dai.core.Terminal;
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
-import java.util.concurrent.Callable;
-
 @CommandLine.Command(
+    name = "client",
     description = "Launch the client.",
     version = "1.0.0",
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
 
+  private final Terminal terminal = new Terminal();
+
   @Override
-  public Integer call() {
+  public Integer call() throws InterruptedException {
+
+    /* TODO :
+     *  Init the connection with the server
+     *  (Create a lobby, join a lobby, etc.)
+     *  Start the game
+     *  Display the game / handle the inputs
+     */
+    initConnection();
+
+    Thread.sleep(5000);
+
     return 0;
+  }
+
+  private void initConnection() {
+
+    terminal.print("Connecting to the server...");
+
+    terminal.drawBackground();
+    terminal.drawPipe(10, 5, 5);
+    terminal.drawPipe(20, 8, 5);
+    terminal.drawPipe(30, 6, 5);
+    terminal.drawPipe(40, 7, 5);
+    terminal.drawBird(5, 6);
+
+    terminal.refresh();
   }
 }
