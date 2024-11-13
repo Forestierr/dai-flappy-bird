@@ -16,9 +16,7 @@ public class Terminal {
   private final int SCREEN_MIN_WIDTH = 80;
   private final int SCREEN_MIN_HEIGHT = 20;
 
-  /**
-   * Constructor
-   */
+  /** Constructor */
   public Terminal() {
     try {
       terminal = new DefaultTerminalFactory().createTerminal();
@@ -42,6 +40,7 @@ public class Terminal {
 
   /**
    * Print a string on the terminal
+   *
    * @param s the string to print
    */
   public void print(String s) {
@@ -80,22 +79,14 @@ public class Terminal {
     }
   }
 
-  /**
-   * Draw the background
-   */
+  /** Draw the background */
   public void drawBackground() {
     int width = screen.getTerminalSize().getColumns();
     int height = screen.getTerminalSize().getRows();
 
-    // draw a black line at the top
-    text.setBackgroundColor(TextColor.ANSI.BLACK);
-    for (int i = 0; i < width; i++) {
-      text.putString(i, 0, " ");
-    }
-
     // draw the ground (BLUE)
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
-    for (int i = 1; i < height; i++) {
+    for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
         text.putString(j, i, " ");
       }
@@ -112,9 +103,7 @@ public class Terminal {
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }
 
-  /**
-   * Draw the welcome screen
-   */
+  /** Draw the welcome screen */
   public void drawWelcome() {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.BLACK);
@@ -129,6 +118,7 @@ public class Terminal {
 
   /**
    * Draw the bird
+   *
    * @param x the x position of the bird
    * @param y the y position of the bird
    */
@@ -143,6 +133,7 @@ public class Terminal {
 
   /**
    * Draw a pipe
+   *
    * @param x the x position of the pipe
    * @param y the y position of the middle of pipe
    * @param space the space between the top and bottom pipe
@@ -165,19 +156,18 @@ public class Terminal {
 
   /**
    * Draw the score
+   *
    * @param score the score to display
    */
   public void drawScore(int score) {
-    text.setBackgroundColor(TextColor.ANSI.BLACK);
-    text.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
+    text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
+    text.setForegroundColor(TextColor.ANSI.BLACK);
     text.putString(1, 0, "Score : " + score, SGR.BOLD);
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }
 
-  /**
-   * Refresh the screen
-   */
+  /** Refresh the screen */
   public void refresh() {
     try {
       screen.refresh();
@@ -188,15 +178,14 @@ public class Terminal {
 
   /**
    * Get the screen
+   *
    * @return the screen
    */
   public Screen getScreen() {
     return screen;
   }
 
-  /**
-   * Close the terminal
-   */
+  /** Close the terminal */
   public void close() {
     try {
       screen.stopScreen();
