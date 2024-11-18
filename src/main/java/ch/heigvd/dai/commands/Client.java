@@ -22,11 +22,11 @@
 // SOFTWARE.
 package ch.heigvd.dai.commands;
 
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
-import java.util.concurrent.Callable;
-
 @CommandLine.Command(
+    name = "client",
     description = "Launch the client.",
     version = "1.0.0",
     scope = CommandLine.ScopeType.INHERIT,
