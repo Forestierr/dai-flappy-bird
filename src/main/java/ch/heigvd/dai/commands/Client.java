@@ -29,6 +29,8 @@ import com.googlecode.lanterna.screen.Screen;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import javax.swing.*;
+
+import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
 @CommandLine.Command(
