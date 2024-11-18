@@ -23,9 +23,8 @@
 package ch.heigvd.dai;
 
 import ch.heigvd.dai.commands.Root;
-import picocli.CommandLine;
-
 import java.io.File;
+import picocli.CommandLine;
 
 public class Main {
 
