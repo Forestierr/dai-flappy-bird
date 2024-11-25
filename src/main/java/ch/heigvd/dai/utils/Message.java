@@ -11,8 +11,8 @@ public enum Message {
   DEAD("DEAD"),
   ACK("ACKK");
 
-  static final String SEPARATOR = " ";
-  static final char EOT = 0x04;
+  private static final String SEPARATOR = " ";
+  private static final char EOT = 0x04;
 
   private String message;
   private String data;
@@ -44,5 +44,10 @@ public enum Message {
       }
     }
     throw new IllegalArgumentException("No constant with text " + message + " found");
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + SEPARATOR + message + EOT;
   }
 }
