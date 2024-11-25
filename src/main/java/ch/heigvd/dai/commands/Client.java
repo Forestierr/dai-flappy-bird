@@ -22,7 +22,14 @@
 // SOFTWARE.
 package ch.heigvd.dai.commands;
 
+import ch.heigvd.dai.core.Terminal;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.Screen;
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import javax.swing.*;
+
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -33,8 +40,76 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
 
+  private final Terminal terminal = new Terminal();
+  private final Screen screen = terminal.getScreen();
+
   @Override
-  public Integer call() {
+  public Integer call() throws InterruptedException {
+
+    /* TODO :
+     *  Init the connection with the server
+     *  (Create a lobby, join a lobby, etc.)
+     *  Start the game
+     *  Display the game / handle the inputs
+     */
+    initConnection();
+
+    gameLoop();
+
     return 0;
+  }
+
+  private void initConnection() {
+    KeyStroke key = null;
+
+    terminal.print("Connecting to the server...");
+
+    terminal.drawBackground();
+    terminal.drawWelcome();
+    terminal.refresh();
+
+    while (true) {
+      try {
+        key = screen.pollInput();
+      } catch (IOException e) {
+        break;
+      }
+
+      if (key != null && (key.getKeyType() == KeyType.Character && key.getCharacter() == ' ')) {
+        // TODO : Play solo
+        break;
+      } else if (key != null
+          && (key.getKeyType() == KeyType.Character && key.getCharacter() == 'm')) {
+        // TODO : Play multiplayer
+        // TODO : ADD toLowerCase() to the key.getCharacter()
+        break;
+      }
+    }
+  }
+
+  private void gameLoop() {
+    KeyStroke key = null;
+    int xBird = 5;
+    int yBird = 6;
+
+    // TODO : while not dead
+    while (true) {
+      terminal.drawBackground();
+      terminal.drawBird(xBird, yBird);
+      terminal.drawPipe(20, 10, 5);
+      terminal.drawScore(42);
+
+      terminal.refresh();
+
+      try {
+        key = screen.pollInput();
+      } catch (IOException e) {
+        break;
+      }
+
+      if (key != null && (key.getKeyType() == KeyType.Character && key.getCharacter() == ' ')) {
+        xBird++;
+      }
+    }
   }
 }
