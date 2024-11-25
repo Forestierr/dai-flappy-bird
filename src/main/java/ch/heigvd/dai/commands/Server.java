@@ -36,12 +36,14 @@ import picocli.CommandLine;
     version = "1.0.0",
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
-public class Server extends Root implements Callable<Integer> {
-
+public class Server implements Callable<Integer> {
+  private int port;
   private static final int SERVER_ID = (int) (Math.random() * 1000000);
 
   @Override
   public Integer call() {
+    port = new Root().getPort();
+
     try (ServerSocket serverSocket = new ServerSocket(port);
         ExecutorService executor = Executors.newCachedThreadPool(); ) {
       System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);

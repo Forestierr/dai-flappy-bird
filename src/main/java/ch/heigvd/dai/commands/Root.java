@@ -17,4 +17,8 @@ public class Root {
       description = "Override the default port.",
       defaultValue = "2000")
   protected int port;
+
+  public int getPort() {
+    return port;
+  }
 }
