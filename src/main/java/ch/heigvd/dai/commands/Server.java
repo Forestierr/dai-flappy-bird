@@ -22,15 +22,13 @@
 // SOFTWARE.
 package ch.heigvd.dai.commands;
 
+import ch.heigvd.dai.server.ClientHandler;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import picocli.CommandLine;
-
-import ch.heigvd.dai.server.ClientHandler;
 
 @CommandLine.Command(
     name = "server",
@@ -38,17 +36,16 @@ import ch.heigvd.dai.server.ClientHandler;
     version = "1.0.0",
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
-public class Server implements Callable<Integer> {
+public class Server extends Root implements Callable<Integer> {
 
-  private static final int PORT = 2000;
   private static final int SERVER_ID = (int) (Math.random() * 1000000);
 
   @Override
   public Integer call() {
-    try (ServerSocket serverSocket = new ServerSocket(PORT);
+    try (ServerSocket serverSocket = new ServerSocket(port);
         ExecutorService executor = Executors.newCachedThreadPool(); ) {
       System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);
-      System.out.println("[Server " + SERVER_ID + "] listening on port " + PORT);
+      System.out.println("[Server " + SERVER_ID + "] listening on port " + port);
 
       while (!serverSocket.isClosed()) {
         Socket clientSocket = serverSocket.accept();

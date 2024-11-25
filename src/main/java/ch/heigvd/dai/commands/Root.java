@@ -14,6 +14,7 @@ import picocli.CommandLine;
 public class Root {
   @CommandLine.Option(
       names = {"-p", "--port"},
-      description = "Override the default port.")
-  protected String port;
+      description = "Override the default port.",
+      defaultValue = "2000")
+  protected int port;
 }

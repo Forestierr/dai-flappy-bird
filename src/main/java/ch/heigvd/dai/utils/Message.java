@@ -1,6 +1,7 @@
 package ch.heigvd.dai.utils;
 
 public enum Message {
+  START("STRT"),
   FLY("FLYY"),
   PIPE("PIPE"),
   JOIN("JOIN"),
@@ -29,7 +30,7 @@ public enum Message {
   }
 
   public String getData() {
-      return data;
+    return data;
   }
 
   public static Message fromString(String message) {
