@@ -11,6 +11,6 @@ FROM eclipse-temurin:21
 WORKDIR /app
 COPY --from=builder /app/target/flappybird-1.0-SNAPSHOT.jar flappybird.jar
 
-EXPOSE 8080
+EXPOSE 2000
 ENTRYPOINT ["java", "-jar", "flappybird.jar"]
 CMD ["server"]
