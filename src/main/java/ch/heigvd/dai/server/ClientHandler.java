@@ -8,70 +8,73 @@ import java.nio.charset.StandardCharsets;
 public class ClientHandler implements Runnable {
 
   private final Socket socket;
-  private static int SERVER_ID;
+  private int serverId;
 
   public ClientHandler(Socket socket, int serverId) {
     this.socket = socket;
-    this.SERVER_ID = serverId;
+    this.serverId = serverId;
   }
 
   @Override
   public void run() {
     try (socket; // This allow to use try-with-resources with the socket
-        BufferedReader in =
+        BufferedReader input =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
-        BufferedWriter out =
+        BufferedWriter output =
             new BufferedWriter(
                 new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
 
-      String clientMessage = in.readLine();
-      Message message = Message.fromString(clientMessage);
+      System.out.println("[Server " + serverId + "] Sending ACK to client");
+      output.write(Message.ACK.toString());
+      output.flush();
+
+      Message message = Message.fromString(Message.readUntilEOT(input));
 
       switch (message) {
         case START:
-          System.out.println("[Server " + SERVER_ID + "] received STRT message");
-          out.write(Message.ACK.toString());
+          System.out.println("[Server " + serverId + "] received STRT message");
+          output.write(Message.ACK.toString());
           break;
         case FLY:
-          System.out.println("[Server " + SERVER_ID + "] received FLYY message");
-          out.write(Message.DATA.toString());
+          System.out.println("[Server " + serverId + "] received FLYY message");
+          output.write(Message.DATA.toString());
           break;
         case JOIN:
-          System.out.println("[Server " + SERVER_ID + "] received LOBY message");
+          System.out.println("[Server " + serverId + "] received LOBY message");
           if (message.getData() != null) {
             System.out.println(
-                "[Server " + SERVER_ID + "] received LOBY message with data: " + message.getData());
-            System.out.println("[Server " + SERVER_ID + "] Join lobby " + message.getData());
-            out.write(Message.DATA.toString());
+                "[Server " + serverId + "] received LOBY message with data: " + message.getData());
+            System.out.println("[Server " + serverId + "] Join lobby " + message.getData());
+            output.write(Message.DATA.toString());
           } else {
-            System.out.println("[Server " + SERVER_ID + "] received LOBY message without data");
-            System.out.println("[Server " + SERVER_ID + "] Create lobby");
-            out.write(Message.DATA.toString());
+            System.out.println("[Server " + serverId + "] received LOBY message without data");
+            System.out.println("[Server " + serverId + "] Create lobby");
+            output.write(Message.DATA.toString());
           }
           break;
         case LIST:
-          System.out.println("[Server " + SERVER_ID + "] received LIST message");
-          out.write(Message.DATA.toString());
+          System.out.println("[Server " + serverId + "] received LIST message");
+          output.write(Message.DATA.toString());
           break;
         case PIPE:
-          System.out.println("[Server " + SERVER_ID + "] received PIPE message");
-          out.write(Message.DATA.toString());
+          System.out.println("[Server " + serverId + "] received PIPE message");
+          output.write(Message.DATA.toString());
           break;
         case QUIT:
-          System.out.println("[Server " + SERVER_ID + "] received QUIT message");
-          out.write(Message.ACK.toString());
+          System.out.println("[Server " + serverId + "] received QUIT message");
+          output.write(Message.ACK.toString());
           break;
         default:
-          System.out.println("[Server " + SERVER_ID + "] received unknown message");
-          out.write(Message.ERROR.toString());
+          System.out.println("[Server " + serverId + "] received unknown message");
+          output.write(Message.ERROR.toString());
           break;
       }
 
-      out.flush();
+      output.flush();
 
     } catch (IOException e) {
-      System.out.println("[Server " + SERVER_ID + "] exception: " + e);
+      System.out.println("[Server " + serverId + "] exception: " + e);
       e.printStackTrace();
     }
   }

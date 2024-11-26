@@ -37,12 +37,14 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Server implements Callable<Integer> {
-  private int port;
+  private int port = Root.getPort();
   private static final int SERVER_ID = (int) (Math.random() * 1000000);
 
   @Override
   public Integer call() {
-    port = new Root().getPort();
+
+    // Message m = Message.fromString(Message.DATA.setData("test").toString());
+    // System.out.println(m);
 
     try (ServerSocket serverSocket = new ServerSocket(port);
         ExecutorService executor = Executors.newCachedThreadPool(); ) {
@@ -51,6 +53,7 @@ public class Server implements Callable<Integer> {
 
       while (!serverSocket.isClosed()) {
         Socket clientSocket = serverSocket.accept();
+        System.out.println("[Server " + SERVER_ID + "] new client connected");
         executor.submit(new ClientHandler(clientSocket, SERVER_ID));
       }
     } catch (IOException e) {

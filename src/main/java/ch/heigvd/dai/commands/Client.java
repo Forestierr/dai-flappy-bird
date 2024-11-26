@@ -23,13 +23,14 @@
 package ch.heigvd.dai.commands;
 
 import ch.heigvd.dai.core.Terminal;
-import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
+import ch.heigvd.dai.utils.Key;
+import ch.heigvd.dai.utils.Message;
 import com.googlecode.lanterna.screen.Screen;
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
-import javax.swing.*;
-
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -43,8 +44,34 @@ public class Client implements Callable<Integer> {
   private final Terminal terminal = new Terminal();
   private final Screen screen = terminal.getScreen();
 
+  private BufferedReader input;
+  private BufferedWriter output;
+
+  // TODO Add ip option
+
   @Override
-  public Integer call() throws InterruptedException {
+  public Integer call() throws InterruptedException, UnknownHostException, IOException {
+
+    Socket socket = new Socket("127.0.0.1", Root.getPort());
+
+    try (BufferedReader input =
+            new BufferedReader(
+                new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        BufferedWriter output =
+            new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8))) {
+
+      this.input = input;
+      this.output = output;
+
+      initConnection();
+
+      gameLoop();
+
+    } catch (Exception e) {
+      System.out.println("Error while connecting to the server" + e.getStackTrace());
+      return 1;
+    }
 
     /* TODO :
      *  Init the connection with the server
@@ -59,36 +86,35 @@ public class Client implements Callable<Integer> {
     return 0;
   }
 
-  private void initConnection() {
-    KeyStroke key = null;
-
+  private void initConnection() throws IOException {
     terminal.print("Connecting to the server...");
+
+    String msg = Message.readUntilEOT(input);
+    Message message = Message.fromString(msg);
+
+    if (message != Message.ACK) {
+      throw new IOException("Cannot connect to server. ACK wasn't received");
+    }
 
     terminal.drawBackground();
     terminal.drawWelcome();
     terminal.refresh();
 
     while (true) {
-      try {
-        key = screen.pollInput();
-      } catch (IOException e) {
-        break;
-      }
 
-      if (key != null && (key.getKeyType() == KeyType.Character && key.getCharacter() == ' ')) {
-        // TODO : Play solo
-        break;
-      } else if (key != null
-          && (key.getKeyType() == KeyType.Character && key.getCharacter() == 'm')) {
-        // TODO : Play multiplayer
-        // TODO : ADD toLowerCase() to the key.getCharacter()
-        break;
+      Key k = Key.parseKeyStroke(screen.pollInput());
+      if (k != Key.NONE) {
+        if (k == Key.FLY) {
+          // TODO: Play solo
+          break;
+        } else if (k == Key.MULTI) {
+          // TODO : Play multiplayer
+        }
       }
     }
   }
 
-  private void gameLoop() {
-    KeyStroke key = null;
+  private void gameLoop() throws IOException {
     int xBird = 5;
     int yBird = 6;
 
@@ -98,16 +124,10 @@ public class Client implements Callable<Integer> {
       terminal.drawBird(xBird, yBird);
       terminal.drawPipe(20, 10, 5);
       terminal.drawScore(42);
-
       terminal.refresh();
 
-      try {
-        key = screen.pollInput();
-      } catch (IOException e) {
-        break;
-      }
-
-      if (key != null && (key.getKeyType() == KeyType.Character && key.getCharacter() == ' ')) {
+      Key key = Key.parseKeyStroke(screen.pollInput());
+      if (key != Key.NONE && key == Key.FLY) {
         xBird++;
       }
     }
