@@ -5,7 +5,7 @@ public class Pipe {
   private int y;
   private int space;
 
-  public Pipe(int x, int y, int width) {
+  public Pipe(int x, int y, int space) {
     this.x = x;
     this.y = y;
     this.space = space;
