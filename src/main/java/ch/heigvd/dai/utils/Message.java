@@ -46,6 +46,9 @@ public enum Message {
   }
 
   public static Message fromString(String message) {
+    if (message.length() < 4) {
+      return Message.ERROR;
+    }
     String msg = message.substring(0, 4);
 
     for (Message m : Message.values()) {

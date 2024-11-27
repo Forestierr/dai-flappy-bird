@@ -9,6 +9,7 @@ public class ClientHandler implements Runnable {
 
   private final Socket socket;
   private int serverId;
+  private Game game;
 
   public ClientHandler(Socket socket, int serverId) {
     this.socket = socket;
@@ -34,11 +35,20 @@ public class ClientHandler implements Runnable {
       switch (message) {
         case START:
           System.out.println("[Server " + serverId + "] received STRT message");
-          output.write(Message.ACK.toString());
+          game = new Game();
+          game.update();
+          output.write(Message.START.toString());
+          output.flush();
           break;
         case FLY:
           System.out.println("[Server " + serverId + "] received FLYY message");
-          output.write(Message.DATA.toString());
+          game.update();
+          System.out.println("[Game DATA] " + game);
+          // Send the game data to the client
+          Message data = Message.DATA.setData(game.toString());
+          System.out.println("[Server " + serverId + "] Sending DATA to client");
+          output.write(data.toString());
+          output.flush();
           break;
         case JOIN:
           System.out.println("[Server " + serverId + "] received LOBY message");
