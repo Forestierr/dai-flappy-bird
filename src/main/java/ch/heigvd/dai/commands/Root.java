@@ -12,8 +12,18 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Root {
+  private static int PORT = 2000;
+
   @CommandLine.Option(
       names = {"-p", "--port"},
-      description = "Override the default port.")
-  protected String port;
+      description = "Override the default port.",
+      defaultValue = "2000",
+      scope = CommandLine.ScopeType.INHERIT)
+  public void setPort(int port) {
+    PORT = port;
+  }
+
+  public static int getPort() {
+    return PORT;
+  }
 }

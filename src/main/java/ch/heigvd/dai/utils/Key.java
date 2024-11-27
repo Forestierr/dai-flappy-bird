@@ -9,6 +9,7 @@ public enum Key {
   QUIT,
   ENTER,
   FLY,
+  MULTI,
   NONE;
 
   /**
@@ -26,9 +27,10 @@ public enum Key {
       case ArrowDown -> Key.DOWN;
       case Enter -> Key.ENTER;
       case Escape -> Key.QUIT;
-      case Character ->
+      case Character -> // TODO : ADD toLowerCase() to the key.getCharacter()
           switch (key.getCharacter()) {
             case 'q' -> Key.QUIT;
+            case 'm' -> Key.MULTI;
             case ' ' -> Key.FLY;
             default -> Key.NONE;
           };

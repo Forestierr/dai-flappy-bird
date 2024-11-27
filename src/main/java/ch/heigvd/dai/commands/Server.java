@@ -22,7 +22,12 @@
 // SOFTWARE.
 package ch.heigvd.dai.commands;
 
+import ch.heigvd.dai.server.ClientHandler;
+import java.io.*;
+import java.net.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -32,9 +37,29 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Server implements Callable<Integer> {
+  private int port = Root.getPort();
+  private static final int SERVER_ID = (int) (Math.random() * 1000000);
 
   @Override
   public Integer call() {
+
+    // Message m = Message.fromString(Message.DATA.setData("test").toString());
+    // System.out.println(m);
+
+    try (ServerSocket serverSocket = new ServerSocket(port);
+        ExecutorService executor = Executors.newCachedThreadPool(); ) {
+      System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);
+      System.out.println("[Server " + SERVER_ID + "] listening on port " + port);
+
+      while (!serverSocket.isClosed()) {
+        Socket clientSocket = serverSocket.accept();
+        System.out.println("[Server " + SERVER_ID + "] new client connected");
+        executor.submit(new ClientHandler(clientSocket, SERVER_ID));
+      }
+    } catch (IOException e) {
+      System.out.println("[Server " + SERVER_ID + "] exception: " + e);
+    }
+
     return 0;
   }
 }
