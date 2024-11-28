@@ -38,10 +38,12 @@ public class ClientHandler implements Runnable {
             System.out.println("[Server " + serverId + "] received STRT message");
             game = new Game();
             game.update();
-            output.write(Message.START.toString());
+            output.write(Message.ACK.toString());
             output.flush();
             break;
+
           case FLY:
+          case PING:
             System.out.println("[Server " + serverId + "] received FLYY message");
 
             /* Create a thread to update the game every 200ms
@@ -50,7 +52,8 @@ public class ClientHandler implements Runnable {
              * When the game is over, the thread will stop
              * The client will receive a DEAD message
              */
-            Thread gameThread =
+
+            /*Thread gameThread =
                 new Thread(
                     () -> {
                       System.out.println("[Server " + serverId + "] Game thread started");
@@ -86,9 +89,8 @@ public class ClientHandler implements Runnable {
                       }
                     });
 
-            gameThread.start();
+            gameThread.start();*/
 
-            /*
             game.update();
             System.out.println("[Game DATA] " + game);
             // Send the game data to the client
@@ -96,9 +98,6 @@ public class ClientHandler implements Runnable {
             data.setData(game.toString());
             System.out.println("[Server " + serverId + "] Sending DATA to client");
             output.write(data.toString());
-            output.flush();
-            */
-
             break;
           case JOIN:
             System.out.println("[Server " + serverId + "] received LOBY message");

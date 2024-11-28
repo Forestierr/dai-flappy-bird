@@ -79,7 +79,7 @@ public class Client implements Callable<Integer> {
     return 0;
   }
 
-  private void initConnection() throws IOException {
+  private void initConnection() throws IOException, InterruptedException {
     terminal.print("Connecting to the server...");
 
     String msg = Message.readUntilEOT(this.input);
@@ -120,37 +120,31 @@ public class Client implements Callable<Integer> {
     }
   }
 
-  private void gameLoop() throws IOException {
+  private void gameLoop() throws IOException, InterruptedException {
     int xBird = 5;
     int yBird = 6;
 
     // send FLY message to the server
-    System.out.println("Message sent: " + Message.FLY);
+    /*System.out.println("Message sent: " + Message.FLY);
     this.output.write(Message.FLY.toString());
-    this.output.flush();
-    String msg;
-    Message message;
+    this.output.flush();*/
 
     // TODO : while not dead
     while (true) {
       Key k = Key.parseKeyStroke(screen.pollInput());
-      if (k != Key.FLY) {
-        terminal.drawBackground();
-        terminal.drawBird(xBird, yBird);
-        terminal.refresh();
-        continue;
+
+      Message m = Message.PING;
+      if (k == Key.FLY) {
+        m = Message.FLY;
       }
 
       // send FLY message to the server
-      System.out.println("New fly: " + Message.FLY);
-      this.output.write(Message.FLY.toString());
+      this.output.write(m.toString());
       this.output.flush();
 
       // read the DATA message from the server
-      msg = Message.readUntilEOT(this.input);
-      message = Message.fromString(msg);
-
-      System.out.println("Message received (gl): " + message);
+      String msg = Message.readUntilEOT(this.input);
+      Message message = Message.fromString(msg);
 
       // SAD ...
       if (message == Message.DEAD) {
@@ -160,13 +154,13 @@ public class Client implements Callable<Integer> {
       terminal.drawBackground();
 
       if (message == Message.DATA) {
-        System.out.println("Message received is DATA");
+        // System.out.println("Message received is DATA");
         // get the data from the message
         // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s" where
         // B
         // stands for Bird and P for Pipe and S is for score.
         String data = message.getData();
-        System.out.println("Data: " + data);
+        // System.out.println("Data: " + data);
         String[] parts = data.split(" ");
 
         for (int i = 0; i < parts.length; i++) {
@@ -177,8 +171,8 @@ public class Client implements Callable<Integer> {
           }
 
           if (parts[i].equals("P")) {
-            System.out.println(
-                "Drawing pipe at " + parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3]);
+            // System.out.println(
+            //   "Drawing pipe at " + parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3]);
             terminal.drawPipe(
                 Integer.parseInt(parts[i + 1]),
                 Integer.parseInt(parts[i + 2]),
@@ -195,6 +189,7 @@ public class Client implements Callable<Integer> {
 
       terminal.drawBird(xBird, yBird);
       terminal.refresh();
+      Thread.sleep(200);
     }
   }
 }
