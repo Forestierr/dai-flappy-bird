@@ -108,7 +108,7 @@ public class Client implements Callable<Integer> {
 
           System.out.println("Message received: " + message);
 
-          if (message == Message.START) {
+          if (message == Message.ACK) {
             // start a single player game
             gameLoop();
           }
@@ -133,6 +133,19 @@ public class Client implements Callable<Integer> {
 
     // TODO : while not dead
     while (true) {
+      Key k = Key.parseKeyStroke(screen.pollInput());
+      if (k != Key.FLY) {
+        terminal.drawBackground();
+        terminal.drawBird(xBird, yBird);
+        terminal.refresh();
+        continue;
+      }
+
+      // send FLY message to the server
+      System.out.println("New fly: " + Message.FLY);
+      this.output.write(Message.FLY.toString());
+      this.output.flush();
+
       // read the DATA message from the server
       msg = Message.readUntilEOT(this.input);
       message = Message.fromString(msg);
@@ -153,6 +166,7 @@ public class Client implements Callable<Integer> {
         // B
         // stands for Bird and P for Pipe and S is for score.
         String data = message.getData();
+        System.out.println("Data: " + data);
         String[] parts = data.split(" ");
 
         for (int i = 0; i < parts.length; i++) {
@@ -181,14 +195,6 @@ public class Client implements Callable<Integer> {
 
       terminal.drawBird(xBird, yBird);
       terminal.refresh();
-
-      Key k = Key.parseKeyStroke(screen.pollInput());
-      if (k == Key.FLY) {
-        // send FLY message to the server
-        System.out.println("New fly: " + Message.FLY);
-        this.output.write(Message.FLY.toString());
-        this.output.flush();
-      }
     }
   }
 }
