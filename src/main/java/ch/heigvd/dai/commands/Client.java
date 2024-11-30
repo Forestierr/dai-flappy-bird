@@ -24,6 +24,8 @@ package ch.heigvd.dai.commands;
 
 import ch.heigvd.dai.core.Terminal;
 import ch.heigvd.dai.utils.Key;
+import ch.heigvd.dai.utils.KeyPoller;
+import ch.heigvd.dai.utils.KeyPoller.KeyListener;
 import ch.heigvd.dai.utils.Message;
 import com.googlecode.lanterna.screen.Screen;
 import java.io.*;
@@ -82,7 +84,7 @@ public class Client implements Callable<Integer> {
   private void initConnection() throws IOException, InterruptedException {
     terminal.print("Connecting to the server...");
 
-    String msg = Message.readUntilEOT(this.input);
+    String msg = Message.readUntilEOT(input);
     Message message = Message.fromString(msg);
 
     if (message != Message.ACK) {
@@ -98,12 +100,12 @@ public class Client implements Callable<Integer> {
       if (k != Key.NONE) {
         if (k == Key.FLY) {
           // send START message to the server
-          this.output.write(Message.START.toString());
-          this.output.flush();
+          output.write(Message.START.toString());
+          output.flush();
 
           System.out.println("Message sent: " + Message.START);
 
-          msg = Message.readUntilEOT(this.input);
+          msg = Message.readUntilEOT(input);
           message = Message.fromString(msg);
 
           System.out.println("Message received: " + message);
@@ -124,26 +126,44 @@ public class Client implements Callable<Integer> {
     int xBird = 5;
     int yBird = 6;
 
-    // send FLY message to the server
-    /*System.out.println("Message sent: " + Message.FLY);
-    this.output.write(Message.FLY.toString());
-    this.output.flush();*/
+    KeyListener keyListener =
+        new KeyListener() {
+          @Override
+          public void onKeyPressed(Key k) {
+            if (k == Key.NONE) {
+              return;
+            }
+
+            Message m = Message.FLY;
+            if (k == Key.FLY) {
+              m = Message.FLY;
+            } else if (k == Key.QUIT) {
+              m = Message.QUIT;
+            }
+
+            try {
+              // send FLY message to the server
+              output.write(m.toString());
+              output.flush();
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        };
+    KeyPoller keyPoller = new KeyPoller(screen, keyListener);
+    keyPoller.start();
 
     // TODO : while not dead
     while (true) {
-      Key k = Key.parseKeyStroke(screen.pollInput());
 
       Message m = Message.PING;
-      if (k == Key.FLY) {
-        m = Message.FLY;
-      }
 
       // send FLY message to the server
-      this.output.write(m.toString());
-      this.output.flush();
+      output.write(m.toString());
+      output.flush();
 
       // read the DATA message from the server
-      String msg = Message.readUntilEOT(this.input);
+      String msg = Message.readUntilEOT(input);
       Message message = Message.fromString(msg);
 
       // SAD ...

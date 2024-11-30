@@ -43,8 +43,11 @@ public class ClientHandler implements Runnable {
             break;
 
           case FLY:
+            game.fly();
+            System.out.println("[Server " + serverId + "] received FLY message");
+
           case PING:
-            System.out.println("[Server " + serverId + "] received FLYY message");
+            System.out.println("[Server " + serverId + "] received PING message");
 
             /* Create a thread to update the game every 200ms
              * While the game is running, the thread will update the game

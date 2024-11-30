@@ -12,12 +12,14 @@ public class Bird {
   }
 
   public void update() {
+    if (velocity < 1) {
+      velocity += 1;
+    }
     y += velocity;
-    velocity += 1;
   }
 
   public void fly() {
-    velocity = -10;
+    velocity = -3;
   }
 
   public int getX() {
