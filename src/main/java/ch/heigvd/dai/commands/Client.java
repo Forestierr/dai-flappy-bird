@@ -115,6 +115,7 @@ public class Client implements Callable<Integer> {
         } else if (k == Key.MULTI) {
           // TODO : Play multiplayer
         }
+        // TODO : Add a quit option
       }
     }
   }
@@ -130,7 +131,7 @@ public class Client implements Callable<Integer> {
               // System.out.println("[Server " + serverId + "] Game thread started");
               while (true) {
                 try {
-                  Thread.sleep(250);
+                  Thread.sleep(100);
 
                   if (isDead) {
                     break;
@@ -207,7 +208,7 @@ public class Client implements Callable<Integer> {
 
       terminal.drawBird(xBird, yBird);
       terminal.refresh();
-      Thread.sleep(200);
+      Thread.sleep(100);
     }
   }
 }

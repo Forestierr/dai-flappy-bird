@@ -61,7 +61,7 @@ public class Terminal {
         screen.refresh();
 
         try {
-          Thread.sleep(200);
+          Thread.sleep(100);
         } catch (InterruptedException e) {
           throw new RuntimeException(e);
         }
@@ -107,7 +107,11 @@ public class Terminal {
 
     text.putString((SCREEN_MIN_WIDTH / 2) - 15, 5, "   Welcome to Flappy Bird     ", SGR.BOLD);
     text.putString((SCREEN_MIN_WIDTH / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
-    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.BOLD);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.CROSSED_OUT);
+
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 17, 18, "Robin Forestier & Antoine Leresche", SGR.ITALIC);
 
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);

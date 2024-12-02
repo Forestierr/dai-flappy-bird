@@ -50,7 +50,7 @@ public class ClientHandler implements Runnable {
                 System.out.println("[Server " + serverId + "] Game thread started");
                 while (true) {
                   try {
-                    Thread.sleep(150);
+                    Thread.sleep(100);
                     if (game.isDead()) {
                       System.out.println("[Server " + serverId + "] Game over");
                       Message dead = Message.DEAD;
