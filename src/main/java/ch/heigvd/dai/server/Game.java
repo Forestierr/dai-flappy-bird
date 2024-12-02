@@ -1,12 +1,13 @@
 package ch.heigvd.dai.server;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Game {
 
   private int score;
   private int frame = 0;
-  private Boolean isDead = false;
+  private boolean isDead = false;
   private Bird bird;
   private ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
@@ -17,7 +18,7 @@ public class Game {
     score = 0;
   }
 
-  public void update() {
+  public synchronized void update() {
     boolean delFlag = false;
 
     for (Pipe pipe : pipes) {
@@ -64,7 +65,7 @@ public class Game {
     }
   }
 
-  public Boolean checkCollision() {
+  private boolean checkCollision() {
     for (Pipe pipe : pipes) {
       if (bird.getX() == pipe.getX()
           && (bird.getY() < pipe.getY() - (pipe.getSpace() / 2)
@@ -81,19 +82,19 @@ public class Game {
     return false;
   }
 
-  public void fly() {
+  public synchronized void fly() {
     bird.fly();
   }
 
-  public void addPipe(int x, int y, int space) {
+  private void addPipe(int x, int y, int space) {
     pipes.add(new Pipe(x, y, space));
   }
 
-  public Boolean isDead() {
+  public synchronized Boolean isDead() {
     return isDead;
   }
 
-  public String toString() {
+  public synchronized String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("B ").append(bird.getX()).append(" ").append(bird.getY());
     for (Pipe pipe : pipes) {
