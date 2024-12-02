@@ -13,8 +13,7 @@ public enum Message {
   DATA("DATA"),
   ERROR("EROR"),
   DEAD("DEAD"),
-  ACK("ACKK"),
-  PING("PING");
+  ACK("ACKK");
 
   private static final String SEPARATOR = " ";
   private static final char EOT = 0x04;

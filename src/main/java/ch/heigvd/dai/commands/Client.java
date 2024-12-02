@@ -49,6 +49,7 @@ public class Client implements Callable<Integer> {
   private BufferedReader input;
   private BufferedWriter output;
 
+  private boolean isDead = false;
   // TODO Add ip option
 
   @Override
@@ -123,41 +124,43 @@ public class Client implements Callable<Integer> {
     int xBird = 5;
     int yBird = 6;
 
-    KeyListener keyListener =
-        new KeyListener() {
-          @Override
-          public void onKeyPressed(Key k) {
-            if (k == Key.NONE) {
-              return;
-            }
+    // TODO maybe add mutex
+    Thread keyPoller =
+            new Thread(
+                    () -> {
+                      // System.out.println("[Server " + serverId + "] Game thread started");
+                      while (true) {
+                        try {
+                          Thread.sleep(250);
 
-            Message m = Message.FLY;
-            if (k == Key.FLY) {
-              m = Message.FLY;
-            } else if (k == Key.QUIT) {
-              m = Message.QUIT;
-            }
+                          if (isDead) {
+                            break;
+                          }
 
-            try {
-              // send FLY message to the server
-              output.write(m.toString());
-              output.flush();
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-          }
-        };
-    KeyPoller keyPoller = new KeyPoller(screen, keyListener);
+                          Key k = Key.parseKeyStroke(screen.readInput());
+                          if (k == Key.NONE) {
+                            continue;
+                          }
+
+                          Message m = Message.FLY;
+                          if (k == Key.FLY) {
+                            m = Message.FLY;
+                          } else if (k == Key.QUIT) {
+                            m = Message.QUIT;
+                          }
+
+                          // send FLY message to the server
+                          output.write(m.toString());
+                          output.flush();
+
+                        } catch (InterruptedException | IOException e) {
+                          e.printStackTrace();
+                        }
+                      }
+                    });
     keyPoller.start();
 
-    // TODO : while not dead
     while (true) {
-
-      Message m = Message.PING;
-
-      // send FLY message to the server
-      output.write(m.toString());
-      output.flush();
 
       // read the DATA message from the server
       String msg = Message.readUntilEOT(input);
@@ -165,6 +168,7 @@ public class Client implements Callable<Integer> {
 
       // SAD ...
       if (message == Message.DEAD) {
+        isDead = true;
         break;
       }
 

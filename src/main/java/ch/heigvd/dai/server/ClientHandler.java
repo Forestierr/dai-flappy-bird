@@ -30,77 +30,57 @@ public class ClientHandler implements Runnable {
       output.write(Message.ACK.toString());
       output.flush();
 
+      Message message = Message.fromString(Message.readUntilEOT(input));
+      if (message != Message.START) {
+        System.out.println("[Server " + serverId + "] received invalid message");
+        // TODO Send error
+        return;
+      }
+
+      System.out.println("[Server " + serverId + "] received STRT message");
+      game = new Game();
+      game.update();
+      output.write(Message.ACK.toString());
+      output.flush();
+
+      // TODO Maybe add mutex
+      Thread gameThread =
+          new Thread(
+              () -> {
+                System.out.println("[Server " + serverId + "] Game thread started");
+                while (true) {
+                  try {
+                    Thread.sleep(150);
+                    if (game.isDead()) {
+                      System.out.println("[Server " + serverId + "] Game over");
+                      Message dead = Message.DEAD;
+
+                      output.write(dead.toString());
+                      output.flush();
+                      break;
+                    }
+
+                    System.out.println("[Game DATA] " + game);
+                    Message data = Message.DATA;
+                    data.setData(game.toString());
+                    output.write(data.toString());
+                    output.flush();
+
+                  } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
+                  }
+                  game.update();
+                }
+              });
+      gameThread.start();
+
       while (!socket.isClosed()) {
-        Message message = Message.fromString(Message.readUntilEOT(input));
+        message = Message.fromString(Message.readUntilEOT(input));
 
         switch (message) {
-          case START:
-            System.out.println("[Server " + serverId + "] received STRT message");
-            game = new Game();
-            game.update();
-            output.write(Message.ACK.toString());
-            output.flush();
-            break;
-
           case FLY:
             game.fly();
             System.out.println("[Server " + serverId + "] received FLY message");
-
-          case PING:
-            System.out.println("[Server " + serverId + "] received PING message");
-
-            /* Create a thread to update the game every 200ms
-             * While the game is running, the thread will update the game
-             * And send the updated game to the client
-             * When the game is over, the thread will stop
-             * The client will receive a DEAD message
-             */
-
-            /*Thread gameThread =
-                new Thread(
-                    () -> {
-                      System.out.println("[Server " + serverId + "] Game thread started");
-                      while (true) {
-                        try {
-                          Thread.sleep(250);
-                        } catch (InterruptedException e) {
-                          e.printStackTrace();
-                        }
-                        game.update();
-                        if (game.isDead()) {
-                          System.out.println("[Server " + serverId + "] Game over");
-                          Message dead = Message.DEAD;
-                          try {
-                            output.write(dead.toString());
-                            output.flush();
-                          } catch (IOException e) {
-                            throw new RuntimeException(e);
-                          }
-                          break;
-                        }
-                        System.out.println("[Game DATA] " + game);
-                        Message data = Message.DATA;
-                        data.setData(game.toString());
-                        try {
-                          output.write(data.toString());
-                          output.flush();
-                        } catch (IOException e) {
-                          System.out.println(
-                              "[Server " + serverId + "] exception game thread : " + e);
-                          e.printStackTrace();
-                        }
-                      }
-                    });
-
-            gameThread.start();*/
-
-            game.update();
-            System.out.println("[Game DATA] " + game);
-            // Send the game data to the client
-            Message data = Message.DATA;
-            data.setData(game.toString());
-            System.out.println("[Server " + serverId + "] Sending DATA to client");
-            output.write(data.toString());
             break;
           case JOIN:
             System.out.println("[Server " + serverId + "] received LOBY message");
@@ -129,6 +109,7 @@ public class ClientHandler implements Runnable {
           case QUIT:
             System.out.println("[Server " + serverId + "] received QUIT message");
             output.write(Message.ACK.toString());
+            output.flush();
             break;
           default:
             System.out.println("[Server " + serverId + "] received unknown message");
@@ -136,7 +117,9 @@ public class ClientHandler implements Runnable {
             break;
         }
 
-        output.flush();
+        if (message == Message.QUIT) {
+          break;
+        }
       }
 
       System.out.println("[Server " + serverId + "] Client disconnected");
