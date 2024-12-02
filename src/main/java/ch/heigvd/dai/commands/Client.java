@@ -41,17 +41,13 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
 
-  private String host = "";
-
   @CommandLine.Option(
       names = {"--host"},
       description = "The host to connect to.",
       defaultValue = "127.0.0.1",
       required = false,
       scope = CommandLine.ScopeType.INHERIT)
-  public void setHost(String host) {
-    this.host = host;
-  }
+  private String host;
 
   private final Terminal terminal = new Terminal();
   private final Screen screen = terminal.getScreen();
