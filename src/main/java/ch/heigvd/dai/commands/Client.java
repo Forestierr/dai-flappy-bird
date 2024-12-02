@@ -54,8 +54,6 @@ public class Client implements Callable<Integer> {
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
 
-    // Socket socket = new Socket("127.0.0.1", Root.getPort());
-
     try (Socket socket = new Socket("127.0.0.1", Root.getPort());
         BufferedReader input =
             new BufferedReader(
@@ -68,8 +66,6 @@ public class Client implements Callable<Integer> {
       this.output = output;
 
       initConnection();
-
-      // gameLoop();
 
     } catch (Exception e) {
       System.out.println("Error while connecting to the server" + e);
