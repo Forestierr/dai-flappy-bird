@@ -41,6 +41,18 @@ import picocli.CommandLine;
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
 
+  private String host = "";
+
+  @CommandLine.Option(
+      names = {"--host"},
+      description = "The host to connect to.",
+      defaultValue = "127.0.0.1",
+      required = false,
+      scope = CommandLine.ScopeType.INHERIT)
+  public void setHost(String host) {
+    this.host = host;
+  }
+
   private final Terminal terminal = new Terminal();
   private final Screen screen = terminal.getScreen();
 
@@ -49,12 +61,10 @@ public class Client implements Callable<Integer> {
 
   private boolean isDead = false;
 
-  // TODO Add ip option
-
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
 
-    try (Socket socket = new Socket("127.0.0.1", Root.getPort());
+    try (Socket socket = new Socket(host, Root.getPort());
         BufferedReader input =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
