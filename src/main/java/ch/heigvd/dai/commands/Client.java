@@ -31,6 +31,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -47,7 +49,7 @@ public class Client implements Callable<Integer> {
   private BufferedReader input;
   private BufferedWriter output;
 
-  private boolean isDead = false;
+  private AtomicBoolean isDead = new AtomicBoolean(false);
 
   // TODO Add ip option
 
@@ -129,7 +131,7 @@ public class Client implements Callable<Integer> {
                 try {
                   Thread.sleep(100);
 
-                  if (isDead) {
+                  if (isDead.get()) {
                     break;
                   }
 
@@ -164,7 +166,7 @@ public class Client implements Callable<Integer> {
 
       // SAD ...
       if (message == Message.DEAD) {
-        isDead = true;
+        isDead.set(true);
         output.write(Message.QUIT.toString());
         break;
       }
