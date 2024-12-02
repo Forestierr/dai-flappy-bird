@@ -24,8 +24,6 @@ package ch.heigvd.dai.commands;
 
 import ch.heigvd.dai.core.Terminal;
 import ch.heigvd.dai.utils.Key;
-import ch.heigvd.dai.utils.KeyPoller;
-import ch.heigvd.dai.utils.KeyPoller.KeyListener;
 import ch.heigvd.dai.utils.Message;
 import com.googlecode.lanterna.screen.Screen;
 import java.io.*;
@@ -50,6 +48,7 @@ public class Client implements Callable<Integer> {
   private BufferedWriter output;
 
   private boolean isDead = false;
+
   // TODO Add ip option
 
   @Override
@@ -126,38 +125,38 @@ public class Client implements Callable<Integer> {
 
     // TODO maybe add mutex
     Thread keyPoller =
-            new Thread(
-                    () -> {
-                      // System.out.println("[Server " + serverId + "] Game thread started");
-                      while (true) {
-                        try {
-                          Thread.sleep(250);
+        new Thread(
+            () -> {
+              // System.out.println("[Server " + serverId + "] Game thread started");
+              while (true) {
+                try {
+                  Thread.sleep(250);
 
-                          if (isDead) {
-                            break;
-                          }
+                  if (isDead) {
+                    break;
+                  }
 
-                          Key k = Key.parseKeyStroke(screen.readInput());
-                          if (k == Key.NONE) {
-                            continue;
-                          }
+                  Key k = Key.parseKeyStroke(screen.readInput());
+                  if (k == Key.NONE) {
+                    continue;
+                  }
 
-                          Message m = Message.FLY;
-                          if (k == Key.FLY) {
-                            m = Message.FLY;
-                          } else if (k == Key.QUIT) {
-                            m = Message.QUIT;
-                          }
+                  Message m = Message.FLY;
+                  if (k == Key.FLY) {
+                    m = Message.FLY;
+                  } else if (k == Key.QUIT) {
+                    m = Message.QUIT;
+                  }
 
-                          // send FLY message to the server
-                          output.write(m.toString());
-                          output.flush();
+                  // send FLY message to the server
+                  output.write(m.toString());
+                  output.flush();
 
-                        } catch (InterruptedException | IOException e) {
-                          e.printStackTrace();
-                        }
-                      }
-                    });
+                } catch (InterruptedException | IOException e) {
+                  e.printStackTrace();
+                }
+              }
+            });
     keyPoller.start();
 
     while (true) {
@@ -169,6 +168,7 @@ public class Client implements Callable<Integer> {
       // SAD ...
       if (message == Message.DEAD) {
         isDead = true;
+        output.write(Message.QUIT.toString());
         break;
       }
 
