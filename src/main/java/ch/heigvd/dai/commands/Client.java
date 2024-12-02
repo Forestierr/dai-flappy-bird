@@ -47,14 +47,15 @@ public class Client implements Callable<Integer> {
   private BufferedReader input;
   private BufferedWriter output;
 
+  private boolean isDead = false;
+
   // TODO Add ip option
 
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
 
-    Socket socket = new Socket("127.0.0.1", Root.getPort());
-
-    try (BufferedReader input =
+    try (Socket socket = new Socket("127.0.0.1", Root.getPort());
+        BufferedReader input =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         BufferedWriter output =
@@ -66,28 +67,19 @@ public class Client implements Callable<Integer> {
 
       initConnection();
 
-      gameLoop();
-
     } catch (Exception e) {
-      System.out.println("Error while connecting to the server" + e.getStackTrace());
+      System.out.println("Error while connecting to the server" + e);
+      System.out.println(e.getStackTrace());
+      e.printStackTrace();
       return 1;
     }
-
-    /* TODO :
-     *  Init the connection with the server
-     *  (Create a lobby, join a lobby, etc.)
-     *  Start the game
-     *  Display the game / handle the inputs
-     */
-    initConnection();
-
-    gameLoop();
 
     return 0;
   }
 
-  private void initConnection() throws IOException {
+  private void initConnection() throws IOException, InterruptedException {
     terminal.print("Connecting to the server...");
+    terminal.refresh();
 
     String msg = Message.readUntilEOT(input);
     Message message = Message.fromString(msg);
@@ -101,35 +93,118 @@ public class Client implements Callable<Integer> {
     terminal.refresh();
 
     while (true) {
-
       Key k = Key.parseKeyStroke(screen.pollInput());
       if (k != Key.NONE) {
         if (k == Key.FLY) {
-          // TODO: Play solo
+          // send START message to the server
+          output.write(Message.START.toString());
+          output.flush();
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            // start a single player game
+            gameLoop();
+          }
           break;
         } else if (k == Key.MULTI) {
           // TODO : Play multiplayer
         }
+        // TODO : Add a quit option
       }
     }
   }
 
-  private void gameLoop() throws IOException {
+  private void gameLoop() throws IOException, InterruptedException {
     int xBird = 5;
     int yBird = 6;
 
-    // TODO : while not dead
-    while (true) {
-      terminal.drawBackground();
-      terminal.drawBird(xBird, yBird);
-      terminal.drawPipe(20, 10, 5);
-      terminal.drawScore(42);
-      terminal.refresh();
+    // TODO maybe add mutex
+    Thread keyPoller =
+        new Thread(
+            () -> {
+              // System.out.println("[Server " + serverId + "] Game thread started");
+              while (true) {
+                try {
+                  Thread.sleep(100);
 
-      Key key = Key.parseKeyStroke(screen.pollInput());
-      if (key != Key.NONE && key == Key.FLY) {
-        xBird++;
+                  if (isDead) {
+                    break;
+                  }
+
+                  Key k = Key.parseKeyStroke(screen.readInput());
+                  if (k == Key.NONE) {
+                    continue;
+                  }
+
+                  Message m = Message.FLY;
+                  if (k == Key.FLY) {
+                    m = Message.FLY;
+                  } else if (k == Key.QUIT) {
+                    m = Message.QUIT;
+                  }
+
+                  // send FLY message to the server
+                  output.write(m.toString());
+                  output.flush();
+
+                } catch (InterruptedException | IOException e) {
+                  e.printStackTrace();
+                }
+              }
+            });
+    keyPoller.start();
+
+    while (true) {
+
+      // read the DATA message from the server
+      String msg = Message.readUntilEOT(input);
+      Message message = Message.fromString(msg);
+
+      // SAD ...
+      if (message == Message.DEAD) {
+        isDead = true;
+        output.write(Message.QUIT.toString());
+        break;
       }
+
+      terminal.drawBackground();
+
+      if (message == Message.DATA) {
+        // System.out.println("Message received is DATA");
+        // get the data from the message
+        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s"
+        // where B stands for Bird and P for Pipe and S is for score.
+        String data = message.getData();
+        // System.out.println("Data: " + data);
+        String[] parts = data.split(" ");
+
+        for (int i = 0; i < parts.length; i++) {
+          // get the x and y coordinates of the bird
+          if (parts[i].equals("B")) {
+            xBird = Integer.parseInt(parts[i + 1]);
+            yBird = Integer.parseInt(parts[i + 2]);
+          }
+
+          if (parts[i].equals("P")) {
+            // System.out.println(
+            //   "Drawing pipe at " + parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3]);
+            terminal.drawPipe(
+                Integer.parseInt(parts[i + 1]),
+                Integer.parseInt(parts[i + 2]),
+                Integer.parseInt(parts[i + 3]));
+          }
+
+          if (parts[i].equals("S")) {
+            terminal.drawScore(Integer.parseInt(parts[i + 1]));
+          }
+        }
+      }
+
+      terminal.drawBird(xBird, yBird);
+      terminal.refresh();
+      Thread.sleep(100);
     }
   }
 }
