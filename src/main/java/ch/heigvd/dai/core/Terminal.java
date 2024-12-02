@@ -81,13 +81,10 @@ public class Terminal {
 
   /** Draw the background */
   public void drawBackground() {
-    int width = getWidth();
-    int height = getHeight();
-
     // draw the ground (BLUE)
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
+    for (int i = 0; i < SCREEN_MIN_HEIGHT; i++) {
+      for (int j = 0; j < SCREEN_MIN_WIDTH; j++) {
         text.putString(j, i, " ");
       }
     }
@@ -95,8 +92,8 @@ public class Terminal {
     // draw the grass (GREEN)
     text.setBackgroundColor(TextColor.ANSI.GREEN);
     text.setForegroundColor(TextColor.ANSI.GREEN_BRIGHT);
-    for (int i = 0; i < width; i++) {
-      text.putString(i, height - 1, "X");
+    for (int i = 0; i < SCREEN_MIN_WIDTH; i++) {
+      text.putString(i, SCREEN_MIN_HEIGHT - 1, "X");
     }
 
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
@@ -108,11 +105,9 @@ public class Terminal {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.BLACK);
 
-    int width = getWidth();
-
-    text.putString((width / 2) - 15, 5, "   Welcome to Flappy Bird     ", SGR.BOLD);
-    text.putString((width / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
-    text.putString((width / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 5, "   Welcome to Flappy Bird     ", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.BOLD);
 
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
@@ -149,7 +144,7 @@ public class Terminal {
     }
 
     // draw the bottom pipe
-    for (int i = y + (space / 2); i < getHeight() - 1; i++) {
+    for (int i = y + (space / 2); i < SCREEN_MIN_HEIGHT - 1; i++) {
       text.putString(x, i, "█");
     }
 

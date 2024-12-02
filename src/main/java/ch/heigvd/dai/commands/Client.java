@@ -173,9 +173,8 @@ public class Client implements Callable<Integer> {
       if (message == Message.DATA) {
         // System.out.println("Message received is DATA");
         // get the data from the message
-        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s" where
-        // B
-        // stands for Bird and P for Pipe and S is for score.
+        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s"
+        // where B stands for Bird and P for Pipe and S is for score.
         String data = message.getData();
         // System.out.println("Data: " + data);
         String[] parts = data.split(" ");
@@ -197,9 +196,7 @@ public class Client implements Callable<Integer> {
           }
 
           if (parts[i].equals("S")) {
-            // TODO : why is score not send in the data
-            // je vais peter mon crane .....
-            terminal.drawScore(42);
+            terminal.drawScore(Integer.parseInt(parts[i + 1]));
           }
         }
       }

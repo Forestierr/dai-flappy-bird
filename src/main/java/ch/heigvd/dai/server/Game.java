@@ -52,8 +52,8 @@ public class Game {
       } else if (y > 20) {
         y = 12;
       }
-      // randomize the space between the pipes from 5 to 7
-      int space = 5 + (int) (Math.random() * 3);
+      // randomize the space between the pipes from 7 to 9
+      int space = 7 + (int) (Math.random() * 3);
 
       addPipe(79, y, space);
     }
@@ -105,7 +105,7 @@ public class Game {
           .append(" ")
           .append(pipe.getSpace());
     }
-    sb.append(" S ").append(score);
+    sb.append(" S ").append(score).append(" ");
     return sb.toString();
   }
 
