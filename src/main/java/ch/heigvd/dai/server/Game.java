@@ -5,25 +5,60 @@ import java.util.ArrayList;
 public class Game {
 
   private int score;
+  private int frame = 0;
   private Boolean isDead = false;
   private Bird bird;
   private ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
   public Game() {
     bird = new Bird(10, 10);
-    pipes.add(new Pipe(25, 10, 3));
-    pipes.add(new Pipe(35, 10, 5));
-    pipes.add(new Pipe(45, 10, 3));
+    pipes.add(new Pipe(65, 10, 7));
+    pipes.add(new Pipe(80, 10, 7));
     score = 0;
   }
 
   public void update() {
+    boolean delFlag = false;
+
     for (Pipe pipe : pipes) {
       pipe.move();
+      // If the pipe is out of the screen, remove it
+      if (pipe.getX() < 0) {
+        delFlag = true;
+        // pipes.remove(pipe);
+      }
+
+      // If the pipe is 1x away from the bird, add 1 to the score
+      if (pipe.getX() == bird.getX() + 1) {
+        score++;
+      }
+    }
+
+    if (delFlag) {
+      pipes.remove(0);
+    }
+
+    setFrame(getFrame() + 1);
+
+    // Add a new pipe every 10 of score
+    if (getFrame() == 20) {
+      setFrame(0);
+      // Get the last pipe to get the y position
+      int y = pipes.get(pipes.size() - 1).getY();
+      // Add a new pipe with a random space
+      y = y + (int) (Math.random() * 10) - 5;
+      if (y < 0) {
+        y = 8;
+      } else if (y > 20) {
+        y = 12;
+      }
+      // randomize the space between the pipes from 5 to 7
+      int space = 5 + (int) (Math.random() * 3);
+
+      addPipe(79, y, space);
     }
 
     bird.update();
-    score++;
 
     if (checkCollision()) {
       isDead = true;
@@ -31,14 +66,19 @@ public class Game {
   }
 
   public Boolean checkCollision() {
-    // TODO : To verify write by copilot /!\ not tested
     for (Pipe pipe : pipes) {
       if (bird.getX() == pipe.getX()
-          && (bird.getY() < pipe.getY() || bird.getY() > pipe.getY() + pipe.getSpace())) {
+          && (bird.getY() < pipe.getY() - (pipe.getSpace() / 2)
+              || bird.getY() > pipe.getY() + (pipe.getSpace() / 2))) {
+        System.out.println("Collision");
+        return true;
+      }
+
+      if (bird.getY() < 0 || bird.getY() > 20) {
+        System.out.println("Out of bounds");
         return true;
       }
     }
-
     return false;
   }
 
@@ -67,5 +107,13 @@ public class Game {
     }
     sb.append(" S ").append(score);
     return sb.toString();
+  }
+
+  public int getFrame() {
+    return frame;
+  }
+
+  public void setFrame(int frame) {
+    this.frame = frame;
   }
 }

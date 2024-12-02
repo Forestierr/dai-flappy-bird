@@ -48,16 +48,16 @@ public class Terminal {
       // get all lines from the string
       String[] lines = s.split("\n");
       // get terminal size
-      int width = screen.getTerminalSize().getColumns();
-      int height = screen.getTerminalSize().getRows();
+      int width = getWidth();
+      int height = getHeight();
 
       while (height < SCREEN_MIN_HEIGHT || width < SCREEN_MIN_WIDTH) {
         text.putString(0, 0, "Terminal too small");
         text.putString(0, 1, "Please resize the terminal");
         text.putString(0, 2, "Terminal size : " + width + "x" + height);
         text.putString(0, 3, "Minimum size : " + SCREEN_MIN_WIDTH + "x" + SCREEN_MIN_HEIGHT);
-        width = screen.getTerminalSize().getColumns();
-        height = screen.getTerminalSize().getRows();
+        width = getWidth();
+        height = getHeight();
         screen.refresh();
 
         try {
@@ -81,8 +81,8 @@ public class Terminal {
 
   /** Draw the background */
   public void drawBackground() {
-    int width = screen.getTerminalSize().getColumns();
-    int height = screen.getTerminalSize().getRows();
+    int width = getWidth();
+    int height = getHeight();
 
     // draw the ground (BLUE)
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
@@ -108,9 +108,11 @@ public class Terminal {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.BLACK);
 
-    text.putString(30, 10, "   Welcome to Flappy Bird     ", SGR.BOLD);
-    text.putString(30, 14, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
-    text.putString(30, 16, "Or press \"m\" for multiplayer", SGR.BOLD);
+    int width = getWidth();
+
+    text.putString((width / 2) - 15, 5, "   Welcome to Flappy Bird     ", SGR.BOLD);
+    text.putString((width / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
+    text.putString((width / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.BOLD);
 
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
@@ -147,7 +149,7 @@ public class Terminal {
     }
 
     // draw the bottom pipe
-    for (int i = y + (space / 2); i < screen.getTerminalSize().getRows() - 1; i++) {
+    for (int i = y + (space / 2); i < getHeight() - 1; i++) {
       text.putString(x, i, "█");
     }
 
@@ -193,5 +195,13 @@ public class Terminal {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public int getWidth() {
+    return screen.getTerminalSize().getColumns();
+  }
+
+  public int getHeight() {
+    return screen.getTerminalSize().getRows();
   }
 }

@@ -83,6 +83,7 @@ public class Client implements Callable<Integer> {
 
   private void initConnection() throws IOException, InterruptedException {
     terminal.print("Connecting to the server...");
+    terminal.refresh();
 
     String msg = Message.readUntilEOT(input);
     Message message = Message.fromString(msg);
@@ -103,12 +104,8 @@ public class Client implements Callable<Integer> {
           output.write(Message.START.toString());
           output.flush();
 
-          System.out.println("Message sent: " + Message.START);
-
           msg = Message.readUntilEOT(input);
           message = Message.fromString(msg);
-
-          System.out.println("Message received: " + message);
 
           if (message == Message.ACK) {
             // start a single player game
