@@ -25,7 +25,6 @@ public class Game {
       // If the pipe is out of the screen, remove it
       if (pipe.getX() < 0) {
         delFlag = true;
-        // pipes.remove(pipe);
       }
 
       // If the pipe is 1x away from the bird, add 1 to the score
@@ -40,7 +39,7 @@ public class Game {
 
     setFrame(getFrame() + 1);
 
-    // Add a new pipe every 10 of score
+    // Add a new pipe every 20 of frame
     if (getFrame() == 20) {
       setFrame(0);
       // Get the last pipe to get the y position
