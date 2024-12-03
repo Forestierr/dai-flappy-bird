@@ -32,7 +32,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -58,9 +57,18 @@ public class Client implements Callable<Integer> {
   private BufferedWriter output;
 
   private AtomicBoolean isDead = new AtomicBoolean(false);
+  private int score = 0;
 
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
+    initConnection();
+
+    return 0;
+  }
+
+  private void initConnection() {
+    terminal.print("Connecting to the server at " + host + " ...");
+    terminal.refresh();
 
     try (Socket socket = new Socket(host, Root.getPort());
         BufferedReader input =
@@ -73,28 +81,19 @@ public class Client implements Callable<Integer> {
       this.input = input;
       this.output = output;
 
-      initConnection();
+      welcome();
 
     } catch (Exception e) {
       System.out.println("Error while connecting to the server" + e);
-      System.out.println(e.getStackTrace());
       e.printStackTrace();
-      return 1;
     }
-
-    return 0;
   }
 
-  private void initConnection() throws IOException, InterruptedException {
-    terminal.print("Connecting to the server...");
-    terminal.refresh();
+  private void welcome() throws IOException, InterruptedException {
+    String msg;
+    Message message;
 
-    String msg = Message.readUntilEOT(input);
-    Message message = Message.fromString(msg);
-
-    if (message != Message.ACK) {
-      throw new IOException("Cannot connect to server. ACK wasn't received");
-    }
+    isDead.set(false);
 
     terminal.drawBackground();
     terminal.drawWelcome();
@@ -105,6 +104,7 @@ public class Client implements Callable<Integer> {
       if (k != Key.NONE) {
         if (k == Key.FLY) {
           // send START message to the server
+          System.out.println("Sending START message to the server");
           output.write(Message.START.toString());
           output.flush();
 
@@ -118,21 +118,64 @@ public class Client implements Callable<Integer> {
           break;
         } else if (k == Key.MULTI) {
           // TODO : Play multiplayer
+          terminal.print("Multiplayer not implemented yet.");
+          terminal.refresh();
+        } else if (k == Key.QUIT) {
+          output.write(Message.QUIT.toString());
+          output.flush();
+          break;
         }
-        // TODO : Add a quit option
+      }
+    }
+  }
+
+  private void gameOver() throws IOException, InterruptedException {
+    String msg;
+    Message message;
+
+    terminal.drawBackground();
+    terminal.drawGameOver(score);
+    terminal.refresh();
+
+    while (true) {
+      Key k = Key.parseKeyStroke(screen.pollInput());
+      if (k != Key.NONE) {
+        if (k == Key.FLY) {
+          // send START message to the server
+          System.out.println("Sending START message to the server");
+          output.write(Message.START.toString());
+          output.flush();
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            // start a single player game
+            gameLoop();
+          }
+          break;
+        } else if (k == Key.MULTI) {
+          // TODO : Play multiplayer
+          terminal.print("Multiplayer not implemented yet.");
+          terminal.refresh();
+        } else if (k == Key.QUIT) {
+          output.write(Message.QUIT.toString());
+          output.flush();
+          break;
+        }
       }
     }
   }
 
   private void gameLoop() throws IOException, InterruptedException {
+    isDead.set(false);
+
     int xBird = 5;
     int yBird = 6;
 
-    // TODO maybe add mutex
     Thread keyPoller =
         new Thread(
             () -> {
-              // System.out.println("[Server " + serverId + "] Game thread started");
               while (true) {
                 try {
                   Thread.sleep(100);
@@ -141,7 +184,7 @@ public class Client implements Callable<Integer> {
                     break;
                   }
 
-                  Key k = Key.parseKeyStroke(screen.readInput());
+                  Key k = Key.parseKeyStroke(screen.pollInput());
                   if (k == Key.NONE) {
                     continue;
                   }
@@ -173,19 +216,19 @@ public class Client implements Callable<Integer> {
       // SAD ...
       if (message == Message.DEAD) {
         isDead.set(true);
-        output.write(Message.QUIT.toString());
+        output.flush();
+        keyPoller.join();
+        gameOver();
         break;
       }
 
       terminal.drawBackground();
 
       if (message == Message.DATA) {
-        // System.out.println("Message received is DATA");
         // get the data from the message
-        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s"
+        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s "
         // where B stands for Bird and P for Pipe and S is for score.
         String data = message.getData();
-        // System.out.println("Data: " + data);
         String[] parts = data.split(" ");
 
         for (int i = 0; i < parts.length; i++) {
@@ -196,8 +239,6 @@ public class Client implements Callable<Integer> {
           }
 
           if (parts[i].equals("P")) {
-            // System.out.println(
-            //   "Drawing pipe at " + parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3]);
             terminal.drawPipe(
                 Integer.parseInt(parts[i + 1]),
                 Integer.parseInt(parts[i + 2]),
@@ -205,7 +246,8 @@ public class Client implements Callable<Integer> {
           }
 
           if (parts[i].equals("S")) {
-            terminal.drawScore(Integer.parseInt(parts[i + 1]));
+            score = Integer.parseInt(parts[i + 1]);
+            terminal.drawScore(score);
           }
         }
       }

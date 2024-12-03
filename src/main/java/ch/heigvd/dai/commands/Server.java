@@ -54,6 +54,7 @@ public class Server implements Callable<Integer> {
       }
     } catch (IOException e) {
       System.out.println("[Server " + SERVER_ID + "] exception: " + e);
+      e.printStackTrace();
     }
 
     return 0;

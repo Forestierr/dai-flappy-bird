@@ -118,6 +118,34 @@ public class Terminal {
   }
 
   /**
+   * Draw the game over screen
+   *
+   * @param score the score to display
+   */
+  public void drawGameOver(int score) {
+    text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
+    text.setForegroundColor(TextColor.ANSI.RED_BRIGHT);
+
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 4, "         Game Over           ", SGR.BOLD);
+    text.setForegroundColor(TextColor.ANSI.BLACK);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15,
+        6,
+        "         Score : " + score + "         ",
+        SGR.BLINK,
+        SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.CROSSED_OUT);
+
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 17, 18, "Robin Forestier & Antoine Leresche", SGR.ITALIC);
+
+    text.setBackgroundColor(TextColor.ANSI.DEFAULT);
+    text.setForegroundColor(TextColor.ANSI.DEFAULT);
+  }
+
+  /**
    * Draw the bird
    *
    * @param x the x position of the bird
@@ -127,7 +155,6 @@ public class Terminal {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.MAGENTA_BRIGHT);
     text.putString(x, y, "@>", SGR.BOLD);
-
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }

@@ -33,10 +33,20 @@ public class ClientHandler implements Runnable {
       send(Message.ACK, output);
 
       Message message = Message.fromString(Message.readUntilEOT(input));
-      if (message != Message.START) {
-        System.out.println("[Server " + serverId + "] received invalid message");
-        // TODO Send error
-        return;
+
+      switch (message) {
+        case START:
+          break;
+        case QUIT:
+          System.out.println("[Server " + serverId + "] received QUIT message");
+          send(Message.ACK, output);
+          return;
+        default:
+          System.out.println("[Server " + serverId + "] received invalid message");
+          Message error = Message.ERROR;
+          error.setData("Expected START message");
+          send(error, output);
+          return;
       }
 
       System.out.println("[Server " + serverId + "] received STRT message");
@@ -44,7 +54,6 @@ public class ClientHandler implements Runnable {
       game.update();
       send(Message.ACK, output);
 
-      // TODO Maybe add mutex
       Thread gameThread =
           new Thread(
               () -> {
@@ -55,12 +64,10 @@ public class ClientHandler implements Runnable {
                     game.update();
                     if (game.isDead()) {
                       System.out.println("[Server " + serverId + "] Game over");
-                      Message dead = Message.DEAD;
-                      send(dead, output);
+                      send(Message.DEAD, output);
                       break;
                     }
 
-                    System.out.println("[Game DATA] " + game);
                     Message data = Message.DATA;
                     data.setData(game.toString());
                     send(data, output);
@@ -75,6 +82,13 @@ public class ClientHandler implements Runnable {
         message = Message.fromString(Message.readUntilEOT(input));
 
         switch (message) {
+          case START:
+            System.out.println("[Server " + serverId + "] received STRT message");
+            send(Message.ACK, output);
+            game.reset();
+            gameThread = new Thread(gameThread);
+            gameThread.start();
+            break;
           case FLY:
             game.fly();
             System.out.println("[Server " + serverId + "] received FLY message");
@@ -109,11 +123,16 @@ public class ClientHandler implements Runnable {
             break;
           default:
             System.out.println("[Server " + serverId + "] received unknown message");
+            Message error = Message.ERROR;
+            error.setData("Unknown message");
             send(Message.ERROR, output);
             break;
         }
 
         if (message == Message.QUIT) {
+          // TODO: to verify !!!
+          System.out.println("[Server " + serverId + "] received QUIT message");
+          send(Message.ACK, output);
           break;
         }
       }
