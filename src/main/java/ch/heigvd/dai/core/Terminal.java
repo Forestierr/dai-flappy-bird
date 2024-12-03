@@ -122,11 +122,11 @@ public class Terminal {
    *
    * @param score the score to display
    */
-  public void drawGameOver(int score) {
+  public void drawGameOver(int score, int bestScore) {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.RED_BRIGHT);
 
-    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 4, "         Game Over           ", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 3, "         Game Over           ", SGR.BOLD);
     text.setForegroundColor(TextColor.ANSI.BLACK);
     text.putString(
         (SCREEN_MIN_WIDTH / 2) - 15,
@@ -134,9 +134,11 @@ public class Terminal {
         "         Score : " + score + "         ",
         SGR.BLINK,
         SGR.BOLD);
-    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 10, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
     text.putString(
-        (SCREEN_MIN_WIDTH / 2) - 15, 12, "Or press \"m\" for multiplayer", SGR.CROSSED_OUT);
+        (SCREEN_MIN_WIDTH / 2) - 15, 8, "      Best Score : " + bestScore + "     ", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 12, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15, 14, "Or press \"m\" for multiplayer", SGR.CROSSED_OUT);
 
     text.putString(
         (SCREEN_MIN_WIDTH / 2) - 17, 18, "Robin Forestier & Antoine Leresche", SGR.ITALIC);
@@ -187,10 +189,11 @@ public class Terminal {
    *
    * @param score the score to display
    */
-  public void drawScore(int score) {
+  public void drawScore(int score, int bestScore) {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.BLACK);
     text.putString(1, 0, "Score : " + score, SGR.BOLD);
+    text.putString(13, 0, "Best Score : " + bestScore, SGR.BOLD);
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }

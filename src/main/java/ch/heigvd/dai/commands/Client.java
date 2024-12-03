@@ -58,6 +58,7 @@ public class Client implements Callable<Integer> {
 
   private AtomicBoolean isDead = new AtomicBoolean(false);
   private int score = 0;
+  private int bestScore = 0;
 
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
@@ -140,7 +141,7 @@ public class Client implements Callable<Integer> {
     Message message;
 
     terminal.drawBackground();
-    terminal.drawGameOver(score);
+    terminal.drawGameOver(score, bestScore);
     terminal.refresh();
 
     while (true) {
@@ -259,7 +260,8 @@ public class Client implements Callable<Integer> {
 
           if (parts[i].equals("S")) {
             score = Integer.parseInt(parts[i + 1]);
-            terminal.drawScore(score);
+            bestScore = Math.max(score, bestScore);
+            terminal.drawScore(score, bestScore);
           }
         }
       }
