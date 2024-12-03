@@ -8,11 +8,20 @@ public class KeyPoller extends Thread {
   private Screen screen;
   private KeyListener listener;
 
+  /**
+   * Constructor
+   *
+   * @param screen
+   * @param listener
+   */
   public KeyPoller(Screen screen, KeyListener listener) {
     this.listener = listener;
     this.screen = screen;
   }
 
+  /**
+   * Run the listener
+   */
   public void run() {
     while (true) {
       try {
@@ -25,6 +34,9 @@ public class KeyPoller extends Thread {
     }
   }
 
+  /**
+   * KeyListener interface
+   */
   public interface KeyListener {
     void onKeyPressed(Key key);
   }

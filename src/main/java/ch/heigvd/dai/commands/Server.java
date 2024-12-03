@@ -30,6 +30,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import picocli.CommandLine;
 
+
+/**
+ * The server command.
+ */
 @CommandLine.Command(
     name = "server",
     description = "Launch the server.",
@@ -41,12 +45,13 @@ public class Server implements Callable<Integer> {
 
   @Override
   public Integer call() {
-
+    // Start the server
     try (ServerSocket serverSocket = new ServerSocket(Root.getPort());
         ExecutorService executor = Executors.newCachedThreadPool(); ) {
       System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);
       System.out.println("[Server " + SERVER_ID + "] listening on port " + Root.getPort());
 
+      // Accept clients
       while (!serverSocket.isClosed()) {
         Socket clientSocket = serverSocket.accept();
         System.out.println("[Server " + SERVER_ID + "] new client connected");

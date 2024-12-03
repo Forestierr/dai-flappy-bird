@@ -34,6 +34,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import picocli.CommandLine;
 
+/**
+ * The client command.
+ */
 @CommandLine.Command(
     name = "client",
     description = "Launch the client.",
@@ -60,6 +63,14 @@ public class Client implements Callable<Integer> {
   private int score = 0;
   private int bestScore = 0;
 
+  /**
+   * The call method is the main method of the client.
+   * It's call by Root when the client command is executed.
+   * @return 0 for success
+   * @throws InterruptedException
+   * @throws UnknownHostException
+   * @throws IOException
+   */
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
     terminal.checkSize();
@@ -68,6 +79,9 @@ public class Client implements Callable<Integer> {
     return 0;
   }
 
+  /**
+   * The initConnection method is responsible for connecting to the server
+   */
   private void initConnection() {
     terminal.print("Connecting to the server at " + host + " ...");
     terminal.refresh();
@@ -91,14 +105,21 @@ public class Client implements Callable<Integer> {
     }
   }
 
+  /**
+   * The welcome method is responsible for displaying the welcome screen and handling the user input
+   * @throws IOException
+   * @throws InterruptedException
+   */
   private void welcome() throws IOException, InterruptedException {
     String msg;
     Message message;
 
+    // Draw the welcome screen
     terminal.drawBackground();
     terminal.drawWelcome();
     terminal.refresh();
 
+    // Wait for user input
     while (true) {
       Key k = Key.parseKeyStroke(screen.pollInput());
       if (k != Key.NONE) {
@@ -126,6 +147,7 @@ public class Client implements Callable<Integer> {
           msg = Message.readUntilEOT(input);
           message = Message.fromString(msg);
 
+          // If the server acknowledge the QUIT message, we can break the loop
           if (message == Message.ACK) {
             break;
           }
@@ -134,19 +156,26 @@ public class Client implements Callable<Integer> {
     }
   }
 
+  /**
+   * The gameOver method is responsible for displaying the game over screen and handling the user input
+   * @throws IOException
+   * @throws InterruptedException
+   */
   private void gameOver() throws IOException, InterruptedException {
     String msg;
     Message message;
 
+    // Draw the game over screen
     terminal.drawBackground();
     terminal.drawGameOver(score, bestScore);
     terminal.refresh();
 
+    // Wait for user input
     while (true) {
       Key k = Key.parseKeyStroke(screen.pollInput());
       if (k != Key.NONE) {
         if (k == Key.FLY) {
-          // send START message to the server
+          // send START message to the server (restart a new game)
           output.write(Message.START.toString());
           output.flush();
 
@@ -183,11 +212,13 @@ public class Client implements Callable<Integer> {
     }
   }
 
+  /**
+   * The gameLoop method is responsible for handling the game loop
+   * @throws IOException
+   * @throws InterruptedException
+   */
   private void gameLoop() throws IOException, InterruptedException {
     isDead.set(false);
-
-    int xBird = 5;
-    int yBird = 6;
 
     Thread keyPoller =
         new Thread(
@@ -224,8 +255,11 @@ public class Client implements Callable<Integer> {
             });
     keyPoller.start();
 
-    while (true) {
+    // Initial position of the bird
+    int xBird = Terminal.SCREEN_MIN_HEIGHT / 2;
+    int yBird = 6;
 
+    while (true) {
       // read the DATA message from the server
       String msg = Message.readUntilEOT(input);
       Message message = Message.fromString(msg);
@@ -258,6 +292,7 @@ public class Client implements Callable<Integer> {
             yBird = Integer.parseInt(parts[i + 2]);
           }
 
+          // get the x, y and width of the pipe
           if (parts[i].equals("P")) {
             terminal.drawPipe(
                 Integer.parseInt(parts[i + 1]),
@@ -265,6 +300,7 @@ public class Client implements Callable<Integer> {
                 Integer.parseInt(parts[i + 3]));
           }
 
+          // get the score
           if (parts[i].equals("S")) {
             score = Integer.parseInt(parts[i + 1]);
             bestScore = Math.max(score, bestScore);
