@@ -38,15 +38,8 @@ public class Terminal {
     text = screen.newTextGraphics();
   }
 
-  /**
-   * Print a string on the terminal
-   *
-   * @param s the string to print
-   */
-  public void print(String s) {
+  public void checkSize() {
     try {
-      // get all lines from the string
-      String[] lines = s.split("\n");
       // get terminal size
       int width = getWidth();
       int height = getHeight();
@@ -66,16 +59,29 @@ public class Terminal {
           throw new RuntimeException(e);
         }
       }
-
-      // display the string
-      for (int i = 0; i < lines.length; i++) {
-        text.putString(0, i, lines[i]);
-      }
-
-      screen.refresh();
-
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  /**
+   * Print a string on the terminal
+   *
+   * @param s the string to print
+   */
+  public void print(String s) {
+    // get all lines from the string
+    String[] lines = s.split("\n");
+
+    // display the string
+    for (int i = 0; i < lines.length; i++) {
+      text.putString(0, i, lines[i]);
+    }
+
+    try {
+      screen.refresh();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 

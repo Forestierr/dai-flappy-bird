@@ -62,6 +62,7 @@ public class Client implements Callable<Integer> {
 
   @Override
   public Integer call() throws InterruptedException, UnknownHostException, IOException {
+    terminal.checkSize();
     initConnection();
 
     return 0;
@@ -93,8 +94,6 @@ public class Client implements Callable<Integer> {
   private void welcome() throws IOException, InterruptedException {
     String msg;
     Message message;
-
-    isDead.set(false);
 
     terminal.drawBackground();
     terminal.drawWelcome();
@@ -157,6 +156,9 @@ public class Client implements Callable<Integer> {
           if (message == Message.ACK) {
             // start a single player game
             gameLoop();
+          } else if (message == Message.ERROR) {
+            terminal.print("Error: " + message.getData());
+            terminal.refresh();
           }
           break;
         } else if (k == Key.MULTI) {
@@ -172,6 +174,9 @@ public class Client implements Callable<Integer> {
 
           if (message == Message.ACK) {
             break;
+          } else if (message == Message.ERROR) {
+            terminal.print("Error: " + message.getData());
+            terminal.refresh();
           }
         }
       }
@@ -230,6 +235,10 @@ public class Client implements Callable<Integer> {
         isDead.set(true);
         keyPoller.join();
         gameOver();
+        break;
+      } else if (message == Message.ERROR) {
+        terminal.print("Error: " + message.getData());
+        terminal.refresh();
         break;
       }
 
