@@ -91,6 +91,10 @@ public class Game {
     return isDead;
   }
 
+  public synchronized void setDead(Boolean dead) {
+    isDead = dead;
+  }
+
   public synchronized String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("B ").append(bird.getX()).append(" ").append(bird.getY());
@@ -112,6 +116,7 @@ public class Game {
     pipes.add(new Pipe(65, 10, 7));
     pipes.add(new Pipe(80, 10, 7));
     score = 0;
+    frame = 0;
     isDead = false;
   }
 

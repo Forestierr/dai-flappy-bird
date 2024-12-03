@@ -123,7 +123,13 @@ public class Client implements Callable<Integer> {
         } else if (k == Key.QUIT) {
           output.write(Message.QUIT.toString());
           output.flush();
-          break;
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            break;
+          }
         }
       }
     }
@@ -161,7 +167,13 @@ public class Client implements Callable<Integer> {
         } else if (k == Key.QUIT) {
           output.write(Message.QUIT.toString());
           output.flush();
-          break;
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            break;
+          }
         }
       }
     }
@@ -194,6 +206,7 @@ public class Client implements Callable<Integer> {
                     m = Message.FLY;
                   } else if (k == Key.QUIT) {
                     m = Message.QUIT;
+                    isDead.set(true);
                   }
 
                   // send FLY message to the server
@@ -213,10 +226,9 @@ public class Client implements Callable<Integer> {
       String msg = Message.readUntilEOT(input);
       Message message = Message.fromString(msg);
 
-      // SAD ...
-      if (message == Message.DEAD) {
+      // Dead or want to quit : show game over screen
+      if (message == Message.DEAD || (message == Message.ACK && isDead.get())) {
         isDead.set(true);
-        output.flush();
         keyPoller.join();
         gameOver();
         break;

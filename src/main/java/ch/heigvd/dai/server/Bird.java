@@ -8,7 +8,7 @@ public class Bird {
   public Bird(int x, int y) {
     this.x = x;
     this.y = y;
-    this.velocity = 0;
+    this.velocity = -1;
   }
 
   public void update() {

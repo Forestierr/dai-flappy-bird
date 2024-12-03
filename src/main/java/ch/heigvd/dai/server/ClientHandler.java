@@ -119,6 +119,9 @@ public class ClientHandler implements Runnable {
             break;
           case QUIT:
             System.out.println("[Server " + serverId + "] received QUIT message");
+            // set is dead to true to stop the game thread
+            game.setDead(true);
+            gameThread.join();
             send(Message.ACK, output);
             break;
           default:
@@ -129,17 +132,20 @@ public class ClientHandler implements Runnable {
             break;
         }
 
+        /*
         if (message == Message.QUIT) {
           // TODO: to verify !!!
           System.out.println("[Server " + serverId + "] received QUIT message");
           send(Message.ACK, output);
           break;
         }
+        */
+
       }
 
       System.out.println("[Server " + serverId + "] Client disconnected");
 
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       System.out.println("[Server " + serverId + "] exception: " + e);
       e.printStackTrace();
     }
