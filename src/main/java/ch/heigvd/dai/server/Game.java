@@ -1,5 +1,6 @@
 package ch.heigvd.dai.server;
 
+import ch.heigvd.dai.core.Terminal;
 import java.util.ArrayList;
 
 public class Game {
@@ -11,9 +12,9 @@ public class Game {
   private ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
   public Game() {
-    bird = new Bird(10, 6);
-    pipes.add(new Pipe(60, 10, 7));
-    pipes.add(new Pipe(80, 10, 7));
+    bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH - 20, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
     score = 0;
   }
 
@@ -48,13 +49,13 @@ public class Game {
       y = y + (int) (Math.random() * 10) - 5;
       if (y < 0) {
         y = 8;
-      } else if (y > 20) {
+      } else if (y > Terminal.SCREEN_MIN_HEIGHT) {
         y = 12;
       }
       // randomize the space between the pipes from 7 to 9
       int space = 7 + (int) (Math.random() * 3);
 
-      addPipe(79, y, space);
+      addPipe(Terminal.SCREEN_MIN_WIDTH - 1, y, space);
     }
 
     bird.update();
@@ -72,7 +73,9 @@ public class Game {
         return true;
       }
 
-      if (bird.getY() < 0 || bird.getY() > 18) {
+      // Check if the bird is out of the screen
+      // screen height is 20 and we check if the bird touch the grass
+      if (bird.getY() < 0 || bird.getY() > Terminal.SCREEN_MIN_HEIGHT - 2) {
         return true;
       }
     }
@@ -111,10 +114,10 @@ public class Game {
   }
 
   public void reset() {
-    bird = new Bird(10, 10);
     pipes.clear();
-    pipes.add(new Pipe(65, 10, 7));
-    pipes.add(new Pipe(80, 10, 7));
+    bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH - 20, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
     score = 0;
     frame = 0;
     isDead = false;

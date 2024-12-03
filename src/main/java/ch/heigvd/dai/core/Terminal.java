@@ -13,8 +13,8 @@ public class Terminal {
   private Screen screen = null;
   private TextGraphics text;
 
-  private final int SCREEN_MIN_WIDTH = 80;
-  private final int SCREEN_MIN_HEIGHT = 20;
+  public static final int SCREEN_MIN_WIDTH = 80;
+  public static final int SCREEN_MIN_HEIGHT = 20;
 
   /** Constructor */
   public Terminal() {

@@ -105,7 +105,6 @@ public class Client implements Callable<Integer> {
       if (k != Key.NONE) {
         if (k == Key.FLY) {
           // send START message to the server
-          System.out.println("Sending START message to the server");
           output.write(Message.START.toString());
           output.flush();
 
@@ -149,7 +148,6 @@ public class Client implements Callable<Integer> {
       if (k != Key.NONE) {
         if (k == Key.FLY) {
           // send START message to the server
-          System.out.println("Sending START message to the server");
           output.write(Message.START.toString());
           output.flush();
 
