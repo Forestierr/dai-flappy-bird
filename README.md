@@ -59,9 +59,6 @@ Then, you can compile the project into a JAR located into the target folder:
 
 # 2. Run the application
 
-> [!IMPORTANT]
-> On windows, you have to use `javaw` command to run the game.
-
 ```bash
 java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar -h
 ```
@@ -72,6 +69,9 @@ You can use the `-h` option to display the help message.
 
 To run the client, you can use the same command with the `client` argument.
 
+> [!IMPORTANT]
+> On windows, you have to use `javaw` command to run the game.
+
 ```bash
 java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar client
 ```
@@ -80,7 +80,7 @@ By default, the server will listen on port 2000 and the client will connect to t
 You can specify the server address and port with the `--host` and `-p` options for the port.
 
 ```bash
-java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar --host="127.0.0.1" -p 2000
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar client --host="127.0.0.1" -p 2000
 ```
 
 ## 2.2 Launch the server
@@ -97,6 +97,8 @@ java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar server -p 2000
 
 ## 2.3 Run the server with Docker
 
+You can use Docker to run the server.
+
 ### Build the Docker image
 
 ```bash
@@ -107,6 +109,22 @@ docker build -t flappy-bird .
 
 ```bash
 docker run -p 2000:2000 flappy-bird server
+```
+
+### Docker image on Docker Hub
+
+You can also use the Docker image available on Docker Hub.
+
+Download the pre-built Docker image from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/forestierr/flappy-bird:latest
+```
+
+Run the server:
+
+```bash
+docker run -p 2000:2000 ghcr.io/forestierr/flappy-bird:latest server
 ```
 
 ## 2.4 How to play
@@ -178,7 +196,7 @@ _LOBY_, _JOIN_, _LIST_, _PIPE_ is for multiplayer case.
 | EROR \<message\> | Error message                     |
 
 - `ACKK`: It is used by the server that it acknowledge the previous command of the client, if some information must communicated by the server the DATA cmd is used.
-- `DATA`: This message is sent is in reponse to FLYY, PIPE, JOIN, LIST. For each information to pass a comma , must be used.
+- `DATA`: This message is sent is in reponse to FLYY, PIPE, JOIN, LIST.
 For `FLYY` and `PIPE` commands it look like this: `DATA B x y P x y w ... P x y w S s` here B stands for Bird and P for Pipe and S for Score.
 For the `JOIN` command: `DATA n` where n is the lobby that was created by the command.
 For the `LIST` command: `DATA n o p ...` where n, o, p are all available lobby to join.
