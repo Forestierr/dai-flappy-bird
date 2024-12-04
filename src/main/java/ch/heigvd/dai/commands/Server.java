@@ -30,10 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import picocli.CommandLine;
 
-
-/**
- * The server command.
- */
+/** The server command. */
 @CommandLine.Command(
     name = "server",
     description = "Launch the server.",
@@ -41,12 +38,14 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Server implements Callable<Integer> {
+  @CommandLine.ParentCommand protected Root parent;
+
   private static final int SERVER_ID = (int) (Math.random() * 1000000);
 
   @Override
   public Integer call() {
     // Start the server
-    try (ServerSocket serverSocket = new ServerSocket(Root.getPort());
+    try (ServerSocket serverSocket = new ServerSocket(parent.getPort());
         ExecutorService executor = Executors.newCachedThreadPool(); ) {
       System.out.println("[Server " + SERVER_ID + "] starting with id " + SERVER_ID);
       System.out.println("[Server " + SERVER_ID + "] listening on port " + Root.getPort());
@@ -60,6 +59,7 @@ public class Server implements Callable<Integer> {
     } catch (IOException e) {
       System.out.println("[Server " + SERVER_ID + "] exception: " + e);
       e.printStackTrace();
+      return 1;
     }
 
     return 0;

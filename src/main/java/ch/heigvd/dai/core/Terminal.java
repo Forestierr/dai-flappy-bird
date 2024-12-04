@@ -38,10 +38,7 @@ public class Terminal {
     text = screen.newTextGraphics();
   }
 
-  /**
-   * Check if the terminal is big enough
-   * If not, display a message to the user
-   */
+  /** Check if the terminal is big enough If not, display a message to the user */
   public void checkSize() {
     try {
       // get terminal size
@@ -57,13 +54,9 @@ public class Terminal {
         height = getHeight();
         screen.refresh();
 
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
+        Thread.sleep(100);
       }
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       e.printStackTrace();
     }
   }
@@ -247,7 +240,7 @@ public class Terminal {
 
   /**
    * Get the height of the terminal
-   * 
+   *
    * @return the height of the terminal
    */
   public int getHeight() {

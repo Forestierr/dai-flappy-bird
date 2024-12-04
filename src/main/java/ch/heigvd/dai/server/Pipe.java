@@ -18,9 +18,7 @@ public class Pipe {
     this.space = space;
   }
 
-  /**
-   * Move the pipe to the left by one pixel
-   */
+  /** Move the pipe to the left by one pixel */
   public void move() {
     x--;
   }

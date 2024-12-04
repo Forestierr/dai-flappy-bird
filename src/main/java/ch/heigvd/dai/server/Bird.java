@@ -17,9 +17,7 @@ public class Bird {
     this.velocity = -1;
   }
 
-  /**
-   * Update the position of the bird
-   */
+  /** Update the position of the bird */
   public void update() {
     if (velocity < 1) {
       velocity += 1;
@@ -27,9 +25,7 @@ public class Bird {
     y += velocity;
   }
 
-  /**
-   * Make the bird fly
-   */
+  /** Make the bird fly */
   public void fly() {
     velocity = -3;
   }

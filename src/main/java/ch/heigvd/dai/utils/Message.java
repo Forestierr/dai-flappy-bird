@@ -3,9 +3,7 @@ package ch.heigvd.dai.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-/**
- * This class represents the messages that can be exchanged between the server and the client.
- */
+/** This class represents the messages that can be exchanged between the server and the client. */
 public enum Message {
   START("STRT"),
   FLY("FLYY"),

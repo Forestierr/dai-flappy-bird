@@ -16,6 +16,7 @@ public class ClientHandler implements Runnable {
 
   /**
    * Constructor
+   *
    * @param socket the socket
    * @param serverId the server id
    */
@@ -24,9 +25,7 @@ public class ClientHandler implements Runnable {
     this.serverId = serverId;
   }
 
-  /**
-   * Run the client handler
-   */
+  /** Run the client handler */
   @Override
   public void run() {
     try (socket; // This allow to use try-with-resources with the socket
@@ -88,7 +87,8 @@ public class ClientHandler implements Runnable {
       gameThread.start();
 
       // Read messages from the client while the socket is open
-      // TODO: because the server does not support 2 player mode, some messages are not correctly implemented yet.
+      // TODO: because the server does not support 2 player mode, some messages are not correctly
+      // implemented yet.
       while (!socket.isClosed()) {
         message = Message.fromString(Message.readUntilEOT(input));
 
@@ -153,8 +153,7 @@ public class ClientHandler implements Runnable {
   }
 
   /**
-   * Send a message to the client
-   * Concurrent access to the output stream is controlled by a mutex
+   * Send a message to the client Concurrent access to the output stream is controlled by a mutex
    *
    * @param message the message
    * @param output the output

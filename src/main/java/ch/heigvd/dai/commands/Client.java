@@ -34,9 +34,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import picocli.CommandLine;
 
-/**
- * The client command.
- */
+/** The client command. */
 @CommandLine.Command(
     name = "client",
     description = "Launch the client.",
@@ -44,6 +42,7 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
+  @CommandLine.ParentCommand protected Root parent;
 
   @CommandLine.Option(
       names = {"--host"},
@@ -64,29 +63,28 @@ public class Client implements Callable<Integer> {
   private int bestScore = 0;
 
   /**
-   * The call method is the main method of the client.
-   * It's call by Root when the client command is executed.
+   * The call method is the main method of the client. It's call by Root when the client command is
+   * executed.
+   *
    * @return 0 for success
    * @throws InterruptedException
    * @throws UnknownHostException
    * @throws IOException
    */
   @Override
-  public Integer call() throws InterruptedException, UnknownHostException, IOException {
+  public Integer call() {
     terminal.checkSize();
     initConnection();
 
     return 0;
   }
 
-  /**
-   * The initConnection method is responsible for connecting to the server
-   */
+  /** The initConnection method is responsible for connecting to the server */
   private void initConnection() {
     terminal.print("Connecting to the server at " + host + " ...");
     terminal.refresh();
 
-    try (Socket socket = new Socket(host, Root.getPort());
+    try (Socket socket = new Socket(host, parent.getPort());
         BufferedReader input =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -107,6 +105,7 @@ public class Client implements Callable<Integer> {
 
   /**
    * The welcome method is responsible for displaying the welcome screen and handling the user input
+   *
    * @throws IOException
    * @throws InterruptedException
    */
@@ -157,7 +156,9 @@ public class Client implements Callable<Integer> {
   }
 
   /**
-   * The gameOver method is responsible for displaying the game over screen and handling the user input
+   * The gameOver method is responsible for displaying the game over screen and handling the user
+   * input
+   *
    * @throws IOException
    * @throws InterruptedException
    */
@@ -214,6 +215,7 @@ public class Client implements Callable<Integer> {
 
   /**
    * The gameLoop method is responsible for handling the game loop
+   *
    * @throws IOException
    * @throws InterruptedException
    */

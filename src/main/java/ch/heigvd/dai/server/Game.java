@@ -11,9 +11,7 @@ public class Game {
   private Bird bird;
   private ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
-  /**
-   * Constructor of the game
-   */
+  /** Constructor of the game */
   public Game() {
     bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
     pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH - 20, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
@@ -21,9 +19,7 @@ public class Game {
     score = 0;
   }
 
-  /**
-   * Update the game (next frame)
-   */
+  /** Update the game (next frame) */
   public synchronized void update() {
     boolean delFlag = false;
 
@@ -95,9 +91,7 @@ public class Game {
     return false;
   }
 
-  /**
-   * Make the bird fly
-   */
+  /** Make the bird fly */
   public synchronized void fly() {
     bird.fly();
   }
@@ -132,9 +126,8 @@ public class Game {
   }
 
   /**
-   * Print the game state :
-   * B x y P x y space ... P x y space S score
-   * B for the bird, P for the pipes and S for the score
+   * Print the game state : B x y P x y space ... P x y space S score B for the bird, P for the
+   * pipes and S for the score
    *
    * @return the game state as a string
    */
@@ -153,9 +146,7 @@ public class Game {
     return sb.toString();
   }
 
-  /**
-   * Reset the game
-   */
+  /** Reset the game */
   public void reset() {
     pipes.clear();
     bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
