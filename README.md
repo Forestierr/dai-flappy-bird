@@ -9,19 +9,43 @@ This project has been made in the context of [DAI](https://github.com/heig-vd-da
 
 ## Description
 
-Simple Flappy Bird game implemented via a client-server app.
+The objective of this project is to implement a simple Flappy Bird game via a client-server application.
 
 ### Single player
 
-You can play the game in single player mode. 
-The goal is to avoid the pipes by pressing the space bar to make the bird fly.
+The game may be played in single-player mode.
+The objective is to evade the pipes by depressing the space bar, thereby enabling the bird to fly.
 
 ### Two players
 
-You can play the game in multiplayer mode.
-One player play the bird and the other one place the pipes.
+> [!CAUTION]
+> The multiplayer mode is not yet implemented.
+> Be free to contribute to the project to implement it.
+
+The game may be played in a multiplayer mode, with one player assuming the role of the bird and the other placing the 
+pipes.
 
 # 1. Build
+
+Flappy Bird has been developed using a Maven repository with a multi-module architectural structure. 
+To run the game, it is necessary to open two separate terminals. 
+
+The first terminal should be used to start the server 
+module, which is responsible for managing player interactions and maintaining the overall game state. 
+
+The second terminal should be used to launch the client module, which serves as the user interface and allows players to
+interact with the game. This module communicates with the server to send player inputs and receive real-time updates on 
+the game's state.
+
+## 1.1 Requirements
+
+It is imperative that the Java Runtime Environment 21 (JRE) or Java Development Kit 21 (JDK) is installed on the 
+computer in question.
+It is essential that the version of Java in use is compatible with the application.
+
+It is possible to utilise Docker to facilitate the operation of the server.
+
+## 1.2 Build the application
 
 Start by cloning the repository:
 ```bash
@@ -35,17 +59,57 @@ Then, you can compile the project into a JAR located into the target folder:
 
 # 2. Run the application
 
-...
+> [!IMPORTANT]
+> On windows, you have to use `javaw` command to run the game.
 
-## 2.1 Launch the server
+```bash
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar -h
+```
 
-To be able to run the application in Windows you have to use `javaw` commande.
+You can use the `-h` option to display the help message.
 
-## 2.2 Launch the client
+## 2.1 Run the client
 
-...
+To run the client, you can use the same command with the `client` argument.
 
-## 2.3 How to play
+```bash
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar client
+```
+
+By default, the server will listen on port 2000 and the client will connect to the localhost.
+You can specify the server address and port with the `--host` and `-p` options for the port.
+
+```bash
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar --host="127.0.0.1" -p 2000
+```
+
+## 2.2 Launch the server
+
+```bash
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar server
+```
+
+You can specify the port with the `-p` option.
+
+```bash
+java -jar target/dai-flappy-bird-1.0-SNAPSHOT.jar server -p 2000
+```
+
+## 2.3 Run the server with Docker
+
+### Build the Docker image
+
+```bash
+docker build -t flappy-bird .
+```
+
+### Run the server
+
+```bash
+docker run -p 2000:2000 flappy-bird server
+```
+
+## 2.4 How to play
 
 ### Single player
 
@@ -55,6 +119,10 @@ To be able to run the application in Windows you have to use `javaw` commande.
 - Have fun!
 
 ### Multiplayer
+
+> [!CAUTION]
+> We haven't got multiplayer mode up and running yet
+> The following instructions are intended for the future implementation.
 
 - Player 1: Press `m` to create a lobby
 - Player 2: Press `j` to join a lobby
