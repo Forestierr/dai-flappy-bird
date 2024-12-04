@@ -164,7 +164,6 @@ The protocol is based on a simple text-based message exchange. Each message is a
 | JOIN \<num\>          | Join the lobby                            |
 | LIST                  | List all existing lobby                   |
 | PIPE \<position _y_\> | Place a new pipe                          |
-| PING                  | Request data for display                  |
 | QUIT                  | Quit the game                             |
 
 _LOBY_, _JOIN_, _LIST_, _PIPE_ is for multiplayer case.
