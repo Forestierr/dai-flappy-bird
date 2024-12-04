@@ -108,7 +108,7 @@ docker build -t flappy-bird .
 ### Run the server
 
 ```bash
-docker run -p 2000:2000 flappy-bird server
+docker run -t -p 2000:2000 flappy-bird server
 ```
 
 ### Docker image on Docker Hub
