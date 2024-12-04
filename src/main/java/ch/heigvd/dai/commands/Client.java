@@ -258,8 +258,8 @@ public class Client implements Callable<Integer> {
     keyPoller.start();
 
     // Initial position of the bird
-    int xBird = Terminal.SCREEN_MIN_HEIGHT / 2;
-    int yBird = 6;
+    int xBird = 0;
+    int yBird = 0;
 
     while (true) {
       // read the DATA message from the server
