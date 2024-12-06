@@ -98,8 +98,10 @@ public class Client implements Callable<Integer> {
       welcome();
 
     } catch (Exception e) {
+      terminal.close();
       System.out.println("Error while connecting to the server" + e);
-      e.printStackTrace();
+      System.out.println("Make sure the server is running and accessible");
+      // e.printStackTrace();
     }
   }
 
