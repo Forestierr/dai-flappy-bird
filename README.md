@@ -14,7 +14,7 @@ The objective of this project is to implement a simple Flappy Bird game via a cl
 ### Single player
 
 The game may be played in single-player mode.
-The objective is to evade the pipes by depressing the space bar, thereby enabling the bird to fly.
+The objective is to evade the pipes by pressing the space bar, thereby enabling the bird to fly.
 
 ### Two players
 
@@ -158,8 +158,8 @@ The "Flap" protocol is a communication protocol that allows a client to connect 
 
 ## 3.2 Transport protocol
 
-The "Flap" protocol is a test based protocol. It uses TCP transport protocol and the port 2000 to communicate.
-Every message must be encoded in UTF-8 and delimited by a newline character (\n). The messages are treated as text messages.
+The "Flap" protocol is a text based protocol. It uses TCP transport protocol and the port 2000 to communicate.
+Every message must be encoded in UTF-8 and delimited by a End of Transmission character (value 0x04). The messages are treated as text messages.
 
 The communication must be established by the client. Once the connection has been established, the server responds with `ACKK` to tell the client that it is ready.
 It can send either `STRT` or `JOIN`.
@@ -197,6 +197,7 @@ _LOBY_, _JOIN_, _LIST_, _PIPE_ is for multiplayer case.
 
 - `ACKK`: It is used by the server that it acknowledge the previous command of the client, if some information must communicated by the server the DATA cmd is used.
 - `DATA`: This message is sent is in reponse to FLYY, PIPE, JOIN, LIST.
+It is also periodically to refresh the client display
 For `FLYY` and `PIPE` commands it look like this: `DATA B x y P x y w ... P x y w S s` here B stands for Bird and P for Pipe and S for Score.
 For the `JOIN` command: `DATA n` where n is the lobby that was created by the command.
 For the `LIST` command: `DATA n o p ...` where n, o, p are all available lobby to join.
