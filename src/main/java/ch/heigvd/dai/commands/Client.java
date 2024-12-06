@@ -32,9 +32,9 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import picocli.CommandLine;
 
+/** The client command. */
 @CommandLine.Command(
     name = "client",
     description = "Launch the client.",
@@ -42,6 +42,7 @@ import picocli.CommandLine;
     scope = CommandLine.ScopeType.INHERIT,
     mixinStandardHelpOptions = true)
 public class Client implements Callable<Integer> {
+  @CommandLine.ParentCommand protected Root parent;
 
   @CommandLine.Option(
       names = {"--host"},
@@ -58,11 +59,32 @@ public class Client implements Callable<Integer> {
   private BufferedWriter output;
 
   private AtomicBoolean isDead = new AtomicBoolean(false);
+  private int score = 0;
+  private int bestScore = 0;
 
+  /**
+   * The call method is the main method of the client. It's call by Root when the client command is
+   * executed.
+   *
+   * @return 0 for success
+   * @throws InterruptedException
+   * @throws UnknownHostException
+   * @throws IOException
+   */
   @Override
-  public Integer call() throws InterruptedException, UnknownHostException, IOException {
+  public Integer call() {
+    terminal.checkSize();
+    initConnection();
 
-    try (Socket socket = new Socket(host, Root.getPort());
+    return 0;
+  }
+
+  /** The initConnection method is responsible for connecting to the server */
+  private void initConnection() {
+    terminal.print("Connecting to the server at " + host + " ...");
+    terminal.refresh();
+
+    try (Socket socket = new Socket(host, parent.getPort());
         BufferedReader input =
             new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
@@ -73,33 +95,32 @@ public class Client implements Callable<Integer> {
       this.input = input;
       this.output = output;
 
-      initConnection();
+      welcome();
 
     } catch (Exception e) {
+      terminal.close();
       System.out.println("Error while connecting to the server" + e);
-      System.out.println(e.getStackTrace());
-      e.printStackTrace();
-      return 1;
+      System.out.println("Make sure the server is running and accessible");
+      // e.printStackTrace();
     }
-
-    return 0;
   }
 
-  private void initConnection() throws IOException, InterruptedException {
-    terminal.print("Connecting to the server...");
-    terminal.refresh();
+  /**
+   * The welcome method is responsible for displaying the welcome screen and handling the user input
+   *
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void welcome() throws IOException, InterruptedException {
+    String msg;
+    Message message;
 
-    String msg = Message.readUntilEOT(input);
-    Message message = Message.fromString(msg);
-
-    if (message != Message.ACK) {
-      throw new IOException("Cannot connect to server. ACK wasn't received");
-    }
-
+    // Draw the welcome screen
     terminal.drawBackground();
     terminal.drawWelcome();
     terminal.refresh();
 
+    // Wait for user input
     while (true) {
       Key k = Key.parseKeyStroke(screen.pollInput());
       if (k != Key.NONE) {
@@ -118,21 +139,94 @@ public class Client implements Callable<Integer> {
           break;
         } else if (k == Key.MULTI) {
           // TODO : Play multiplayer
+          terminal.print("Multiplayer not implemented yet.");
+          terminal.refresh();
+        } else if (k == Key.QUIT) {
+          output.write(Message.QUIT.toString());
+          output.flush();
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          // If the server acknowledge the QUIT message, we can break the loop
+          if (message == Message.ACK) {
+            break;
+          }
         }
-        // TODO : Add a quit option
       }
     }
   }
 
-  private void gameLoop() throws IOException, InterruptedException {
-    int xBird = 5;
-    int yBird = 6;
+  /**
+   * The gameOver method is responsible for displaying the game over screen and handling the user
+   * input
+   *
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void gameOver() throws IOException, InterruptedException {
+    String msg;
+    Message message;
 
-    // TODO maybe add mutex
+    // Draw the game over screen
+    terminal.drawBackground();
+    terminal.drawGameOver(score, bestScore);
+    terminal.refresh();
+
+    // Wait for user input
+    while (true) {
+      Key k = Key.parseKeyStroke(screen.pollInput());
+      if (k != Key.NONE) {
+        if (k == Key.FLY) {
+          // send START message to the server (restart a new game)
+          output.write(Message.START.toString());
+          output.flush();
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            // start a single player game
+            gameLoop();
+          } else if (message == Message.ERROR) {
+            terminal.print("Error: " + message.getData());
+            terminal.refresh();
+          }
+          break;
+        } else if (k == Key.MULTI) {
+          // TODO : Play multiplayer
+          terminal.print("Multiplayer not implemented yet.");
+          terminal.refresh();
+        } else if (k == Key.QUIT) {
+          output.write(Message.QUIT.toString());
+          output.flush();
+
+          msg = Message.readUntilEOT(input);
+          message = Message.fromString(msg);
+
+          if (message == Message.ACK) {
+            break;
+          } else if (message == Message.ERROR) {
+            terminal.print("Error: " + message.getData());
+            terminal.refresh();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * The gameLoop method is responsible for handling the game loop
+   *
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void gameLoop() throws IOException, InterruptedException {
+    isDead.set(false);
+
     Thread keyPoller =
         new Thread(
             () -> {
-              // System.out.println("[Server " + serverId + "] Game thread started");
               while (true) {
                 try {
                   Thread.sleep(100);
@@ -141,7 +235,7 @@ public class Client implements Callable<Integer> {
                     break;
                   }
 
-                  Key k = Key.parseKeyStroke(screen.readInput());
+                  Key k = Key.parseKeyStroke(screen.pollInput());
                   if (k == Key.NONE) {
                     continue;
                   }
@@ -151,6 +245,7 @@ public class Client implements Callable<Integer> {
                     m = Message.FLY;
                   } else if (k == Key.QUIT) {
                     m = Message.QUIT;
+                    isDead.set(true);
                   }
 
                   // send FLY message to the server
@@ -164,28 +259,34 @@ public class Client implements Callable<Integer> {
             });
     keyPoller.start();
 
-    while (true) {
+    // Initial position of the bird
+    int xBird = 0;
+    int yBird = 0;
 
+    while (true) {
       // read the DATA message from the server
       String msg = Message.readUntilEOT(input);
       Message message = Message.fromString(msg);
 
-      // SAD ...
-      if (message == Message.DEAD) {
+      // Dead or want to quit : show game over screen
+      if (message == Message.DEAD || (message == Message.ACK && isDead.get())) {
         isDead.set(true);
-        output.write(Message.QUIT.toString());
+        keyPoller.join();
+        gameOver();
+        break;
+      } else if (message == Message.ERROR) {
+        terminal.print("Error: " + message.getData());
+        terminal.refresh();
         break;
       }
 
       terminal.drawBackground();
 
       if (message == Message.DATA) {
-        // System.out.println("Message received is DATA");
         // get the data from the message
-        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s"
+        // For FLYY and PIPE commands it look like this: "DATA B x y P x y w ... P x y w S s "
         // where B stands for Bird and P for Pipe and S is for score.
         String data = message.getData();
-        // System.out.println("Data: " + data);
         String[] parts = data.split(" ");
 
         for (int i = 0; i < parts.length; i++) {
@@ -195,17 +296,19 @@ public class Client implements Callable<Integer> {
             yBird = Integer.parseInt(parts[i + 2]);
           }
 
+          // get the x, y and width of the pipe
           if (parts[i].equals("P")) {
-            // System.out.println(
-            //   "Drawing pipe at " + parts[i + 1] + " " + parts[i + 2] + " " + parts[i + 3]);
             terminal.drawPipe(
                 Integer.parseInt(parts[i + 1]),
                 Integer.parseInt(parts[i + 2]),
                 Integer.parseInt(parts[i + 3]));
           }
 
+          // get the score
           if (parts[i].equals("S")) {
-            terminal.drawScore(Integer.parseInt(parts[i + 1]));
+            score = Integer.parseInt(parts[i + 1]);
+            bestScore = Math.max(score, bestScore);
+            terminal.drawScore(score, bestScore);
           }
         }
       }

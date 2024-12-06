@@ -13,8 +13,8 @@ public class Terminal {
   private Screen screen = null;
   private TextGraphics text;
 
-  private final int SCREEN_MIN_WIDTH = 80;
-  private final int SCREEN_MIN_HEIGHT = 20;
+  public static final int SCREEN_MIN_WIDTH = 80;
+  public static final int SCREEN_MIN_HEIGHT = 20;
 
   /** Constructor */
   public Terminal() {
@@ -38,15 +38,9 @@ public class Terminal {
     text = screen.newTextGraphics();
   }
 
-  /**
-   * Print a string on the terminal
-   *
-   * @param s the string to print
-   */
-  public void print(String s) {
+  /** Check if the terminal is big enough If not, display a message to the user */
+  public void checkSize() {
     try {
-      // get all lines from the string
-      String[] lines = s.split("\n");
       // get terminal size
       int width = getWidth();
       int height = getHeight();
@@ -60,22 +54,31 @@ public class Terminal {
         height = getHeight();
         screen.refresh();
 
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
+        Thread.sleep(100);
       }
-
-      // display the string
-      for (int i = 0; i < lines.length; i++) {
-        text.putString(0, i, lines[i]);
-      }
-
-      screen.refresh();
-
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       e.printStackTrace();
+    }
+  }
+
+  /**
+   * Print a string on the terminal
+   *
+   * @param s the string to print
+   */
+  public void print(String s) {
+    // get all lines from the string
+    String[] lines = s.split("\n");
+
+    // display the string
+    for (int i = 0; i < lines.length; i++) {
+      text.putString(0, i, lines[i]);
+    }
+
+    try {
+      screen.refresh();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -118,6 +121,36 @@ public class Terminal {
   }
 
   /**
+   * Draw the game over screen
+   *
+   * @param score the score to display
+   */
+  public void drawGameOver(int score, int bestScore) {
+    text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
+    text.setForegroundColor(TextColor.ANSI.RED_BRIGHT);
+
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 3, "         Game Over           ", SGR.BOLD);
+    text.setForegroundColor(TextColor.ANSI.BLACK);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15,
+        6,
+        "         Score : " + score + "         ",
+        SGR.BLINK,
+        SGR.BOLD);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15, 8, "      Best Score : " + bestScore + "     ", SGR.BOLD);
+    text.putString((SCREEN_MIN_WIDTH / 2) - 15, 12, " Press \"SPACE BAR\" to play  ", SGR.BOLD);
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 15, 14, "Or press \"m\" for multiplayer", SGR.CROSSED_OUT);
+
+    text.putString(
+        (SCREEN_MIN_WIDTH / 2) - 17, 18, "Robin Forestier & Antoine Leresche", SGR.ITALIC);
+
+    text.setBackgroundColor(TextColor.ANSI.DEFAULT);
+    text.setForegroundColor(TextColor.ANSI.DEFAULT);
+  }
+
+  /**
    * Draw the bird
    *
    * @param x the x position of the bird
@@ -127,7 +160,6 @@ public class Terminal {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.MAGENTA_BRIGHT);
     text.putString(x, y, "@>", SGR.BOLD);
-
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }
@@ -160,10 +192,11 @@ public class Terminal {
    *
    * @param score the score to display
    */
-  public void drawScore(int score) {
+  public void drawScore(int score, int bestScore) {
     text.setBackgroundColor(TextColor.ANSI.BLUE_BRIGHT);
     text.setForegroundColor(TextColor.ANSI.BLACK);
     text.putString(1, 0, "Score : " + score, SGR.BOLD);
+    text.putString(13, 0, "Best Score : " + bestScore, SGR.BOLD);
     text.setBackgroundColor(TextColor.ANSI.DEFAULT);
     text.setForegroundColor(TextColor.ANSI.DEFAULT);
   }
@@ -196,10 +229,20 @@ public class Terminal {
     }
   }
 
+  /**
+   * Get the width of the terminal
+   *
+   * @return the width of the terminal
+   */
   public int getWidth() {
     return screen.getTerminalSize().getColumns();
   }
 
+  /**
+   * Get the height of the terminal
+   *
+   * @return the height of the terminal
+   */
   public int getHeight() {
     return screen.getTerminalSize().getRows();
   }

@@ -1,7 +1,7 @@
 package ch.heigvd.dai.server;
 
+import ch.heigvd.dai.core.Terminal;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Game {
 
@@ -11,13 +11,15 @@ public class Game {
   private Bird bird;
   private ArrayList<Pipe> pipes = new ArrayList<Pipe>();
 
+  /** Constructor of the game */
   public Game() {
-    bird = new Bird(10, 10);
-    pipes.add(new Pipe(65, 10, 7));
-    pipes.add(new Pipe(80, 10, 7));
+    bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH - 20, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
     score = 0;
   }
 
+  /** Update the game (next frame) */
   public synchronized void update() {
     boolean delFlag = false;
 
@@ -34,6 +36,7 @@ public class Game {
       }
     }
 
+    // Remove the first pipe if it's out of the screen
     if (delFlag) {
       pipes.remove(0);
     }
@@ -49,15 +52,16 @@ public class Game {
       y = y + (int) (Math.random() * 10) - 5;
       if (y < 0) {
         y = 8;
-      } else if (y > 20) {
+      } else if (y > Terminal.SCREEN_MIN_HEIGHT) {
         y = 12;
       }
       // randomize the space between the pipes from 7 to 9
       int space = 7 + (int) (Math.random() * 3);
 
-      addPipe(79, y, space);
+      addPipe(Terminal.SCREEN_MIN_WIDTH - 1, y, space);
     }
 
+    // Make the bird fly
     bird.update();
 
     if (checkCollision()) {
@@ -65,35 +69,68 @@ public class Game {
     }
   }
 
+  /**
+   * Check if the bird is in collision with a pipe or out of the screen
+   *
+   * @return true if the bird is in collision
+   */
   private boolean checkCollision() {
     for (Pipe pipe : pipes) {
       if (bird.getX() == pipe.getX()
           && (bird.getY() < pipe.getY() - (pipe.getSpace() / 2)
               || bird.getY() > pipe.getY() + (pipe.getSpace() / 2))) {
-        System.out.println("Collision");
         return true;
       }
 
-      if (bird.getY() < 0 || bird.getY() > 20) {
-        System.out.println("Out of bounds");
+      // Check if the bird is out of the screen
+      // screen height is 20 and we check if the bird touch the grass
+      if (bird.getY() < 0 || bird.getY() > Terminal.SCREEN_MIN_HEIGHT - 2) {
         return true;
       }
     }
     return false;
   }
 
+  /** Make the bird fly */
   public synchronized void fly() {
     bird.fly();
   }
 
+  /**
+   * Add a pipe to the game
+   *
+   * @param x x position of the pipe
+   * @param y y position of the pipe
+   * @param space space between the pipes (up and down)
+   */
   private void addPipe(int x, int y, int space) {
     pipes.add(new Pipe(x, y, space));
   }
 
+  /**
+   * Return if the bird is dead
+   *
+   * @return true if the bird is dead
+   */
   public synchronized Boolean isDead() {
     return isDead;
   }
 
+  /**
+   * Set the bird dead or alive
+   *
+   * @param dead true if the bird is dead
+   */
+  public synchronized void setDead(Boolean dead) {
+    isDead = dead;
+  }
+
+  /**
+   * Print the game state : B x y P x y space ... P x y space S score B for the bird, P for the
+   * pipes and S for the score
+   *
+   * @return the game state as a string
+   */
   public synchronized String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("B ").append(bird.getX()).append(" ").append(bird.getY());
@@ -109,10 +146,31 @@ public class Game {
     return sb.toString();
   }
 
+  /** Reset the game */
+  public void reset() {
+    pipes.clear();
+    bird = new Bird(Terminal.SCREEN_MIN_HEIGHT / 2, 6);
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH - 20, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
+    pipes.add(new Pipe(Terminal.SCREEN_MIN_WIDTH, Terminal.SCREEN_MIN_HEIGHT / 2, 7));
+    score = 0;
+    frame = 0;
+    isDead = false;
+  }
+
+  /**
+   * Get the current frame number
+   *
+   * @return the frame number
+   */
   public int getFrame() {
     return frame;
   }
 
+  /**
+   * Set the current frame number
+   *
+   * @param frame
+   */
   public void setFrame(int frame) {
     this.frame = frame;
   }

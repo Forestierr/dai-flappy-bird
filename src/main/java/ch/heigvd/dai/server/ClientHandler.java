@@ -14,11 +14,18 @@ public class ClientHandler implements Runnable {
 
   private Semaphore mutex = new Semaphore(1);
 
+  /**
+   * Constructor
+   *
+   * @param socket the socket
+   * @param serverId the server id
+   */
   public ClientHandler(Socket socket, int serverId) {
     this.socket = socket;
     this.serverId = serverId;
   }
 
+  /** Run the client handler */
   @Override
   public void run() {
     try (socket; // This allow to use try-with-resources with the socket
@@ -33,18 +40,28 @@ public class ClientHandler implements Runnable {
       send(Message.ACK, output);
 
       Message message = Message.fromString(Message.readUntilEOT(input));
-      if (message != Message.START) {
-        System.out.println("[Server " + serverId + "] received invalid message");
-        // TODO Send error
-        return;
+
+      switch (message) {
+        case START:
+          break;
+        case QUIT:
+          System.out.println("[Server " + serverId + "] received QUIT message");
+          send(Message.ACK, output);
+          return;
+        default:
+          System.out.println("[Server " + serverId + "] received invalid message");
+          Message error = Message.ERROR;
+          error.setData("Expected START message");
+          send(error, output);
+          return;
       }
 
       System.out.println("[Server " + serverId + "] received STRT message");
+      // Create a new game
       game = new Game();
       game.update();
       send(Message.ACK, output);
 
-      // TODO Maybe add mutex
       Thread gameThread =
           new Thread(
               () -> {
@@ -55,12 +72,10 @@ public class ClientHandler implements Runnable {
                     game.update();
                     if (game.isDead()) {
                       System.out.println("[Server " + serverId + "] Game over");
-                      Message dead = Message.DEAD;
-                      send(dead, output);
+                      send(Message.DEAD, output);
                       break;
                     }
 
-                    System.out.println("[Game DATA] " + game);
                     Message data = Message.DATA;
                     data.setData(game.toString());
                     send(data, output);
@@ -71,10 +86,20 @@ public class ClientHandler implements Runnable {
               });
       gameThread.start();
 
+      // Read messages from the client while the socket is open
+      // TODO: because the server does not support 2 player mode, some messages are not correctly
+      // implemented yet.
       while (!socket.isClosed()) {
         message = Message.fromString(Message.readUntilEOT(input));
 
         switch (message) {
+          case START:
+            System.out.println("[Server " + serverId + "] received STRT message");
+            send(Message.ACK, output);
+            game.reset();
+            gameThread = new Thread(gameThread);
+            gameThread.start();
+            break;
           case FLY:
             game.fly();
             System.out.println("[Server " + serverId + "] received FLY message");
@@ -105,27 +130,34 @@ public class ClientHandler implements Runnable {
             break;
           case QUIT:
             System.out.println("[Server " + serverId + "] received QUIT message");
+            // set is dead to true to stop the game thread
+            game.setDead(true);
+            gameThread.join();
             send(Message.ACK, output);
             break;
           default:
             System.out.println("[Server " + serverId + "] received unknown message");
+            Message error = Message.ERROR;
+            error.setData("Unknown message");
             send(Message.ERROR, output);
             break;
-        }
-
-        if (message == Message.QUIT) {
-          break;
         }
       }
 
       System.out.println("[Server " + serverId + "] Client disconnected");
 
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       System.out.println("[Server " + serverId + "] exception: " + e);
       e.printStackTrace();
     }
   }
 
+  /**
+   * Send a message to the client Concurrent access to the output stream is controlled by a mutex
+   *
+   * @param message the message
+   * @param output the output
+   */
   private void send(Message message, BufferedWriter output) {
     try {
       mutex.acquire();
