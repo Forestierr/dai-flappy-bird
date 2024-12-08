@@ -197,7 +197,7 @@ _LOBY_, _JOIN_, _LIST_, _PIPE_ is for multiplayer case.
 
 - `ACKK`: It is used by the server that it acknowledge the previous command of the client, if some information must communicated by the server the DATA cmd is used.
 - `DATA`: This message is sent is in reponse to FLYY, PIPE, JOIN, LIST.
-It is also periodically to refresh the client display
+It is also sent periodically to refresh the client display
 For `FLYY` and `PIPE` commands it look like this: `DATA B x y P x y w ... P x y w S s` here B stands for Bird and P for Pipe and S for Score.
 For the `JOIN` command: `DATA n` where n is the lobby that was created by the command.
 For the `LIST` command: `DATA n o p ...` where n, o, p are all available lobby to join.
